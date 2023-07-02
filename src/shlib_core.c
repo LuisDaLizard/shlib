@@ -75,6 +75,7 @@ void graphics_clear_screen(float color[4])
 void graphics_begin_drawing(void)
 {
     window_poll_events();
+    
 }
 
 void graphics_end_drawing(void)
