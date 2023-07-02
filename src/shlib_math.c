@@ -83,3 +83,8 @@ void matrix_print(Matrix matrix)
     printf("|%f, %f, %f, %f|\n", matrix.m20, matrix.m21, matrix.m22, matrix.m23);
     printf("|%f, %f, %f, %f|\n", matrix.m30, matrix.m31, matrix.m32, matrix.m33);
 }
+
+void vec3_print(Vec3 vector)
+{
+    printf("(%f, %f, %f)\n", vector.x, vector.y, vector.z);
+}

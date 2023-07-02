@@ -22,6 +22,8 @@ extern Matrix matrix_identity();
 extern Matrix matrix_translation(Vec3 translation);
 extern Vec3 matrix_mul_vec3(Matrix left, Vec3 right);
 extern Matrix matrix_mul(Matrix left, Matrix right);
+
 extern void matrix_print(Matrix matrix);
+extern void vec3_print(Vec3 vector);
 
 #endif //SHLIB_SHLIB_MATH_H
