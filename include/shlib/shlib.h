@@ -8,7 +8,6 @@
 #include <stdbool.h>
 
 // ------------ Shlib Core Window API ------------ //
-
 extern void window_init(int width, int height, const char *title);
 extern void window_destroy(void);
 extern bool window_should_close(void);

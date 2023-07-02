@@ -8,6 +8,7 @@ add_subdirectory(libs/glfw)
 set(SOURCE
         src/glad/src/glad.c
         src/shlib_core.c
+        src/shlib_math.c
         )
 
 add_library(shlib ${SOURCE})

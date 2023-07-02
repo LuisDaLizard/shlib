@@ -79,6 +79,5 @@ void graphics_begin_drawing(void)
 
 void graphics_end_drawing(void)
 {
-
     window_swap_buffers();
 }
