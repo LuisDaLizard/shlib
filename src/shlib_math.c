@@ -3,6 +3,10 @@
 //
 
 #include <stdio.h>
+#include <math.h>
+
+#define DEG2RAD (float)(M_PI / 180.0f)
+#define RAD2DEG (float)(180.0f / M_PI)
 
 typedef struct
 {
@@ -27,13 +31,47 @@ Matrix matrix_identity()
     return result;
 }
 
-Matrix matrix_translation(Vec3 translation)
+Matrix matrix_create_translation(Vec3 translation)
 {
     Matrix result = matrix_identity();
 
     result.m03 = translation.x;
     result.m13 = translation.y;
     result.m23 = translation.z;
+
+    return result;
+}
+
+Matrix matrix_create_scalar(Vec3 scalar)
+{
+    Matrix result = matrix_identity();
+
+    result.m00 *= scalar.x;
+    result.m11 *= scalar.y;
+    result.m22 *= scalar.z;
+
+    return result;
+}
+
+Matrix matrix_create_rotation(Vec3 axis, float degrees)
+{
+    float rads = degrees * DEG2RAD;
+    float cosr = cosf(rads);
+    float sinr = sinf(rads);
+
+    Matrix result = matrix_identity();
+
+    result.m00 = cosr + powf(axis.x, 2) * (1 - cosr);
+    result.m01 = axis.x * axis.y * (1 - cosr) - axis.z * sinr;
+    result.m02 = axis.x * axis.z * (1 - cosr) + axis.y * sinr;
+
+    result.m10 = axis.y * axis.x * (1 - cosr) + axis.z * sinr;
+    result.m11 = cosr + powf(axis.y, 2) * (1 - cosr);
+    result.m12 = axis.y * axis.z * (1 - cosr) - axis.x * sinr;
+
+    result.m20 = axis.z * axis.x * (1 - cosr) - axis.y * sinr;
+    result.m21 = axis.z * axis.y * (1 - cosr) + axis.x * sinr;
+    result.m22 = cosr + powf(axis.z, 2) * (1 - cosr);
 
     return result;
 }

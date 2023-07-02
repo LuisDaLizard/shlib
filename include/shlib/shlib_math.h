@@ -19,9 +19,14 @@ typedef struct
 } Matrix;
 
 extern Matrix matrix_identity();
-extern Matrix matrix_translation(Vec3 translation);
+extern Matrix matrix_create_translation(Vec3 translation);
+extern Matrix matrix_create_scalar(Vec3 scalar);
+extern Matrix matrix_create_rotation(Vec3 axis, float degrees);
+
 extern Vec3 matrix_mul_vec3(Matrix left, Vec3 right);
 extern Matrix matrix_mul(Matrix left, Matrix right);
+
+extern Vec3 vec3_normalize(Vec3 vector);
 
 extern void matrix_print(Matrix matrix);
 extern void vec3_print(Vec3 vector);
