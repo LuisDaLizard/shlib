@@ -18,10 +18,17 @@ typedef struct
     float m30, m31, m32, m33;
 } Matrix;
 
+// ------------ Matrix Transformation Utility ------------- //
+
 extern Matrix matrix_identity();
-extern Matrix matrix_create_translation(Vec3 translation);
+
 extern Matrix matrix_create_scalar(Vec3 scalar);
 extern Matrix matrix_create_rotation(Vec3 axis, float degrees);
+extern Matrix matrix_create_translation(Vec3 translation);
+
+extern Matrix matrix_scale(Matrix matrix, Vec3 scalar);
+extern Matrix matrix_rotate(Matrix matrix, Vec3 axis, float degrees);
+extern Matrix matrix_translate(Matrix matrix, Vec3 translation);
 
 extern Vec3 matrix_mul_vec3(Matrix left, Vec3 right);
 extern Matrix matrix_mul(Matrix left, Matrix right);
