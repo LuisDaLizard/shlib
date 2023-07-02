@@ -33,9 +33,14 @@ extern Matrix matrix_translate(Matrix matrix, Vec3 translation);
 extern Vec3 matrix_mul_vec3(Matrix left, Vec3 right);
 extern Matrix matrix_mul(Matrix left, Matrix right);
 
-extern Vec3 vec3_normalize(Vec3 vector);
+//extern Vec3 vec3_normalize(Vec3 vector);
 
 extern void matrix_print(Matrix matrix);
 extern void vec3_print(Vec3 vector);
+
+// ------------ Projection & View Matrix ----------- //
+
+extern Matrix matrix_ortho(float left, float right, float top, float bottom, float near, float far);
+//extern Matrix matrix_look_at(Vec3 eye, Vec3 target);
 
 #endif //SHLIB_SHLIB_MATH_H

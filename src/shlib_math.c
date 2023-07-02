@@ -153,3 +153,18 @@ void vec3_print(Vec3 vector)
 {
     printf("(%f, %f, %f)\n", vector.x, vector.y, vector.z);
 }
+
+Matrix matrix_ortho(float left, float right, float top, float bottom, float near, float far)
+{
+    Matrix result = matrix_identity();
+
+    result.m00 = 2 / (right - left);
+    result.m11 = 2 / (top - bottom);
+    result.m22 = -2 / (far - near);
+
+    result.m03 = -((right + left) / (right - left));
+    result.m13 = -((top + bottom) / (top - bottom));
+    result.m23 = -((far + near) / (far - near));
+
+    return result;
+}
