@@ -18,10 +18,10 @@ typedef struct
     float m30, m31, m32, m33;
 } Matrix;
 
-Matrix matrix_identity();
-Matrix matrix_translation(Vec3 translation);
-Vec3 matrix_mul_vec3(Matrix left, Vec3 right);
-Matrix matrix_mul(Matrix left, Matrix right);
-void matrix_print(Matrix matrix);
+extern Matrix matrix_identity();
+extern Matrix matrix_translation(Vec3 translation);
+extern Vec3 matrix_mul_vec3(Matrix left, Vec3 right);
+extern Matrix matrix_mul(Matrix left, Matrix right);
+extern void matrix_print(Matrix matrix);
 
 #endif //SHLIB_SHLIB_MATH_H
