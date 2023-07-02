@@ -71,3 +71,14 @@ void graphics_clear_screen(float color[4])
     glClearColor(color[0], color[1], color[2], color[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
+
+void graphics_begin_drawing(void)
+{
+    window_poll_events();
+}
+
+void graphics_end_drawing(void)
+{
+
+    window_swap_buffers();
+}
