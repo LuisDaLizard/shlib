@@ -18,6 +18,7 @@ void window_init(int width, int height, const char *title)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
+    window.monitor = glfwGetPrimaryMonitor();
     window.handle = glfwCreateWindow(window.width, window.height, title, 0, 0);
 
     if (!window.handle)
@@ -48,4 +49,19 @@ void window_poll_events(void)
 void window_swap_buffers(void)
 {
     glfwSwapBuffers(window.handle);
+}
+
+void window_toggle_fullscreen(void)
+{
+    if (!window.fullscreen)
+    {
+        const GLFWvidmode *video_mode = glfwGetVideoMode(window.monitor);
+        glfwSetWindowMonitor(window.handle, window.monitor, 0, 0, video_mode->width, video_mode->height, 0);
+        window.fullscreen = true;
+    }
+    else
+    {
+        glfwSetWindowMonitor(window.handle, 0, 0, 0, window.width, window.height, 0);
+        window.fullscreen = false;
+    }
 }

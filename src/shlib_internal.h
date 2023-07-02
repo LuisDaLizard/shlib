@@ -14,8 +14,10 @@
 typedef struct
 {
     GLFWwindow *handle;
+    GLFWmonitor *monitor;
     int width;
     int height;
+    bool fullscreen;
 } Window;
 
 Window window;
