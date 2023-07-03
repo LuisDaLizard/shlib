@@ -10,6 +10,11 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
+
+/*********************************************************
+ *                       STRUCTURES                      *
+ *********************************************************/
 
 typedef struct
 {
@@ -64,7 +69,72 @@ typedef struct
     Batch current_batch;
 } Graphics;
 
+typedef struct
+{
+    unsigned int id;
+} Shader;
+
+/*********************************************************
+ *                    WINDOW FUNCTIONS                   *
+ *********************************************************/
+
+void window_init(int width, int height, const char *title);
+void window_destroy(void);
+bool window_should_close(void);
+void window_poll_events(void);
+void window_swap_buffers(void);
+void window_toggle_fullscreen(void);
+
+/*********************************************************
+ *                   GRAPHICS FUNCTIONS                  *
+ *********************************************************/
+
+void graphics_clear_screen(float color[4]);
+void graphics_begin_drawing(void);
+void graphics_end_drawing(void);
+void graphics_draw_quad(void);
+
+/*********************************************************
+ *                    SHADER FUNCTIONS                   *
+ *********************************************************/
+
+Shader shader_load_from_memory(const char *vertex_src, const char *fragment_src);
+Shader shader_load_from_file(const char *vertex_path, const char *fragment_path);
+void shader_unload(Shader shader);
+
+/*********************************************************
+ *                  CORE MATH FUNCTIONS                  *
+ *********************************************************/
+
+Matrix matrix_identity();
+Vec3 matrix_mul_vec3(Matrix left, Vec3 right);
+Matrix matrix_mul(Matrix left, Matrix right);
+void matrix_print(Matrix matrix);
+void vec3_print(Vec3 vector);
+
+/*********************************************************
+ *            MATRIX TRANSFORMATION FUNCTIONS            *
+ *********************************************************/
+
+Matrix matrix_create_scalar(Vec3 scalar);
+Matrix matrix_create_rotation(Vec3 axis, float degrees);
+Matrix matrix_create_translation(Vec3 translation);
+Matrix matrix_scale(Matrix matrix, Vec3 scalar);
+Matrix matrix_rotate(Matrix matrix, Vec3 axis, float degrees);
+Matrix matrix_translate(Matrix matrix, Vec3 translation);
+
+/*********************************************************
+ *           MATRIX PROJECTION & VIEW FUNCTIONS          *
+ *********************************************************/
+
 Matrix matrix_ortho(float left, float right, float top, float bottom, float near, float far);
+Matrix matrix_look_at(Vec3 eye, Vec3 target);
+
+/*********************************************************
+ *                    BATCH FUNCTIONS                    *
+ *********************************************************/
+
 Batch batch_create(int max_quads);
+void batch_flush(Batch batch);
 
 #endif //SHLIB_SHLIB_INTERNAL_H

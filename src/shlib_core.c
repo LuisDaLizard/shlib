@@ -5,8 +5,16 @@
 
 #include "shlib_internal.h"
 
+/*********************************************************
+ *                        GLOBALS                        *
+ *********************************************************/
+
 Window window = { 0 };
 Graphics graphics = { 0 };
+
+/*********************************************************
+ *                    WINDOW FUNCTIONS                   *
+ *********************************************************/
 
 void window_init(int width, int height, const char *title)
 {
@@ -69,6 +77,10 @@ void window_toggle_fullscreen(void)
     }
 }
 
+/*********************************************************
+ *                   GRAPHICS FUNCTIONS                  *
+ *********************************************************/
+
 void graphics_clear_screen(float color[4])
 {
     glClearColor(color[0], color[1], color[2], color[3]);
@@ -79,10 +91,12 @@ void graphics_begin_drawing(void)
 {
     window_poll_events();
     graphics.projection = matrix_ortho(-1, 1, -1, 1, 0.01f, 1000.0f);
+    graphics.current_batch = batch_create(1000);
 }
 
 void graphics_end_drawing(void)
 {
+    batch_flush(graphics.current_batch);
     window_swap_buffers();
 }
 
@@ -90,6 +104,67 @@ void graphics_draw_quad(void)
 {
 
 }
+
+/*********************************************************
+ *                    SHADER FUNCTIONS                   *
+ *********************************************************/
+
+Shader shader_load_from_memory(const char *vertex_src, const char *fragment_src)
+{
+    Shader result;
+
+    unsigned int vertex, fragment;
+    int success;
+    char info_log[512];
+
+    vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex, 1, &vertex_src, NULL);
+    glCompileShader(vertex);
+
+    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        glGetShaderInfoLog(vertex, 512, NULL, info_log);
+        printf("Vertex Shader Compilation Error: %s\n", info_log);
+    }
+
+    fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment, 1, &fragment_src, NULL);
+    glCompileShader(fragment);
+
+    glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        glGetShaderInfoLog(fragment, 512, NULL, info_log);
+        printf("Fragment Shader Compilation Error: %s\n", info_log);
+    }
+
+    result.id = glCreateProgram();
+    glAttachShader(result.id, vertex);
+    glAttachShader(result.id, fragment);
+    glLinkProgram(result.id);
+
+    glGetProgramiv(result.id, GL_LINK_STATUS, &success);
+    if(!success)
+    {
+        glGetProgramInfoLog(result.id, 512, NULL, info_log);
+        printf("Program Linking Error: %s\n", info_log);
+    }
+
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+
+    return result;
+}
+
+void shader_unload(Shader shader)
+{
+    glDeleteProgram(shader.id)
+}
+
+/*********************************************************
+ *                     BATCH FUNCTIONS                   *
+ *********************************************************/
 
 Batch batch_create(int max_quads)
 {
@@ -136,4 +211,12 @@ Batch batch_create(int max_quads)
     glBindVertexArray(0);
 
     return result;
+}
+
+void batch_flush(Batch batch)
+{
+
+
+    free(batch.vertices);
+    free(batch.indices);
 }

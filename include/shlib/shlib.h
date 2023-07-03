@@ -20,6 +20,8 @@ typedef struct
     float m30, m31, m32, m33;
 } Matrix;
 
+typedef struct {} Shader;
+
 // ------------ Shlib Core Window API ------------ //
 extern void window_init(int width, int height, const char *title);
 extern void window_destroy(void);
@@ -33,6 +35,10 @@ extern void graphics_clear_screen(float color[4]);
 extern void graphics_begin_drawing(void);
 extern void graphics_end_drawing(void);
 extern void graphics_draw_quad(void);
+
+// ------------ Shlib Shader Utilities ------------ //
+extern Shader shader_load_from_memory(const char *vertex_src, const char *fragment_src);
+extern Shader shader_load_from_file(const char *vertex_path, const char *fragment_path);
 
 // ------------ Matrix Utilities ------------- //
 extern Matrix matrix_identity();
