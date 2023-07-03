@@ -109,6 +109,31 @@ void graphics_draw_quad(void)
  *                    SHADER FUNCTIONS                   *
  *********************************************************/
 
+Shader shader_load_from_file(const char *vertex_path, const char *fragment_path)
+{
+    Shader result = { 0 };
+    char *vertex_src, *fragment_src;
+
+    vertex_src = file_read(vertex_path);
+    fragment_src = file_read(fragment_path);
+
+    if (!vertex_src)
+        printf("Unable to read vertex shader file.\n");
+
+    if (!vertex_src)
+        printf("Unable to read fragment shader file.\n");
+
+    if (!vertex_src || !fragment_src)
+        return result;
+
+    result = shader_load_from_memory(vertex_src, fragment_src);
+
+    free(vertex_src);
+    free(fragment_src);
+
+    return result;
+}
+
 Shader shader_load_from_memory(const char *vertex_src, const char *fragment_src)
 {
     Shader result;
@@ -159,7 +184,7 @@ Shader shader_load_from_memory(const char *vertex_src, const char *fragment_src)
 
 void shader_unload(Shader shader)
 {
-    glDeleteProgram(shader.id)
+    glDeleteProgram(shader.id);
 }
 
 /*********************************************************
@@ -219,4 +244,27 @@ void batch_flush(Batch batch)
 
     free(batch.vertices);
     free(batch.indices);
+}
+
+/*********************************************************
+ *                 FILE UTILITY FUNCTIONS                *
+ *********************************************************/
+
+char *file_read(const char *path)
+{
+    FILE *file = fopen(path, "r");
+    if (!file)
+        return NULL;
+
+    fseek(file, 0, SEEK_END);
+    int length = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    char *result = calloc(length + 1, 1);
+    unsigned int result_len = fread(result, 1, length, file);
+
+    if (result_len != length)
+        return NULL;
+
+    return result;
 }

@@ -43,6 +43,11 @@ typedef struct
 
 typedef struct
 {
+    unsigned int id;
+} Shader;
+
+typedef struct
+{
     GLFWwindow *handle;
     GLFWmonitor *monitor;
     int width;
@@ -67,12 +72,8 @@ typedef struct
 {
     Matrix projection;
     Batch current_batch;
+    Shader base_shader;
 } Graphics;
-
-typedef struct
-{
-    unsigned int id;
-} Shader;
 
 /*********************************************************
  *                    WINDOW FUNCTIONS                   *
@@ -136,5 +137,11 @@ Matrix matrix_look_at(Vec3 eye, Vec3 target);
 
 Batch batch_create(int max_quads);
 void batch_flush(Batch batch);
+
+/*********************************************************
+ *                 FILE UTILITY FUNCTIONS                *
+ *********************************************************/
+
+char *file_read(const char *path);
 
 #endif //SHLIB_SHLIB_INTERNAL_H
