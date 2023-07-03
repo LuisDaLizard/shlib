@@ -20,7 +20,7 @@ typedef struct
     float m30, m31, m32, m33;
 } Matrix;
 
-struct Shader;
+typedef struct sShader Shader;
 
 /*********************************************************
  *                    WINDOW FUNCTIONS                   *
