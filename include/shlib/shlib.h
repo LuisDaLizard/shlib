@@ -32,6 +32,7 @@ extern void window_toggle_fullscreen(void);
 extern void graphics_clear_screen(float color[4]);
 extern void graphics_begin_drawing(void);
 extern void graphics_end_drawing(void);
+extern void graphics_draw_quad(void);
 
 // ------------ Matrix Utilities ------------- //
 extern Matrix matrix_identity();
