@@ -99,9 +99,9 @@ void graphics_draw_quad(void);
  *                    SHADER FUNCTIONS                   *
  *********************************************************/
 
-Shader shader_load_from_memory(const char *vertex_src, const char *fragment_src);
-Shader shader_load_from_file(const char *vertex_path, const char *fragment_path);
-void shader_unload(Shader shader);
+Shader *shader_load_from_memory(const char *vertex_src, const char *fragment_src);
+Shader *shader_load_from_file(const char *vertex_path, const char *fragment_path);
+void shader_unload(Shader *shader);
 
 /*********************************************************
  *                  CORE MATH FUNCTIONS                  *

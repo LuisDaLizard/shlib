@@ -109,9 +109,9 @@ void graphics_draw_quad(void)
  *                    SHADER FUNCTIONS                   *
  *********************************************************/
 
-Shader shader_load_from_file(const char *vertex_path, const char *fragment_path)
+Shader *shader_load_from_file(const char *vertex_path, const char *fragment_path)
 {
-    Shader result = { 0 };
+    Shader *result = calloc(1, sizeof(Shader));
     char *vertex_src, *fragment_src;
 
     vertex_src = file_read(vertex_path);
@@ -134,9 +134,9 @@ Shader shader_load_from_file(const char *vertex_path, const char *fragment_path)
     return result;
 }
 
-Shader shader_load_from_memory(const char *vertex_src, const char *fragment_src)
+Shader *shader_load_from_memory(const char *vertex_src, const char *fragment_src)
 {
-    Shader result;
+    Shader *result = calloc(1, sizeof(Shader));
 
     unsigned int vertex, fragment;
     int success;
@@ -164,15 +164,15 @@ Shader shader_load_from_memory(const char *vertex_src, const char *fragment_src)
         printf("Fragment Shader Compilation Error: %s\n", info_log);
     }
 
-    result.id = glCreateProgram();
-    glAttachShader(result.id, vertex);
-    glAttachShader(result.id, fragment);
-    glLinkProgram(result.id);
+    result->id = glCreateProgram();
+    glAttachShader(result->id, vertex);
+    glAttachShader(result->id, fragment);
+    glLinkProgram(result->id);
 
-    glGetProgramiv(result.id, GL_LINK_STATUS, &success);
+    glGetProgramiv(result->id, GL_LINK_STATUS, &success);
     if(!success)
     {
-        glGetProgramInfoLog(result.id, 512, NULL, info_log);
+        glGetProgramInfoLog(result->id, 512, NULL, info_log);
         printf("Program Linking Error: %s\n", info_log);
     }
 
@@ -182,9 +182,10 @@ Shader shader_load_from_memory(const char *vertex_src, const char *fragment_src)
     return result;
 }
 
-void shader_unload(Shader shader)
+void shader_unload(Shader *shader)
 {
-    glDeleteProgram(shader.id);
+    glDeleteProgram(shader->id);
+    free(shader);
 }
 
 /*********************************************************

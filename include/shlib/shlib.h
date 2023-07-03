@@ -20,7 +20,7 @@ typedef struct
     float m30, m31, m32, m33;
 } Matrix;
 
-typedef struct sShader Shader;
+typedef void Shader;
 
 /*********************************************************
  *                    WINDOW FUNCTIONS                   *
@@ -46,9 +46,9 @@ extern void graphics_end_drawing(void);
  *                    SHADER FUNCTIONS                   *
  *********************************************************/
 
-extern Shader shader_load_from_memory(const char *vertex_src, const char *fragment_src);
-extern Shader shader_load_from_file(const char *vertex_path, const char *fragment_path);
-extern void shader_unload(Shader shader);
+extern Shader *shader_load_from_memory(const char *vertex_src, const char *fragment_src);
+extern Shader *shader_load_from_file(const char *vertex_path, const char *fragment_path);
+extern void shader_unload(Shader *shader);
 
 /*********************************************************
  *                  CORE MATH FUNCTIONS                  *
