@@ -5,6 +5,10 @@
 #include "shlib_internal.h"
 
 #include <stdio.h>
+
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#endif
 #include <math.h>
 
 #define DEG2RAD (float)(M_PI / 180.0f)

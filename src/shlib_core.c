@@ -5,8 +5,8 @@
 
 #include "shlib_internal.h"
 
-Window window = {};
-Graphics graphics = {};
+Window window = { 0 };
+Graphics graphics = { 0 };
 
 void window_init(int width, int height, const char *title)
 {
