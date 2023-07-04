@@ -39,6 +39,27 @@ void window_init(int width, int height, const char *title)
 
     if (!gladLoadGLLoader((GLADloadproc)&glfwGetProcAddress))
         exit(-1);
+
+    const char *vertex_src = "#version 400 core\n"
+                             "\n"
+                             "layout (location = 0) in vec3 aPosition;\n"
+                             "layout (location = 1) in vec3 aNormal;\n"
+                             "layout (location = 2) in vec2 aTexCoord;\n"
+                             "\n"
+                             "void main()\n"
+                             "{\n"
+                             "    gl_Position = vec4(aPosition, 1);\n"
+                             "}";
+    const char *fragment_src = "#version 400 core\n"
+                               "\n"
+                               "out vec4 oColor;\n"
+                               "\n"
+                               "void main()\n"
+                               "{\n"
+                               "    oColor = vec4(1, 0, 1, 1);\n"
+                               "}";
+
+    graphics.base_shader = shader_load_from_memory(vertex_src, fragment_src);
 }
 
 void window_destroy(void)
@@ -81,9 +102,9 @@ void window_toggle_fullscreen(void)
  *                   GRAPHICS FUNCTIONS                  *
  *********************************************************/
 
-void graphics_clear_screen(float color[4])
+void graphics_clear_screen(Vec4 color)
 {
-    glClearColor(color[0], color[1], color[2], color[3]);
+    glClearColor(color.x, color.y, color.z, color.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -188,6 +209,11 @@ void shader_unload(Shader *shader)
     free(shader);
 }
 
+void shader_use(Shader *shader)
+{
+    glUseProgram(shader->id);
+}
+
 /*********************************************************
  *                     BATCH FUNCTIONS                   *
  *********************************************************/
@@ -261,8 +287,11 @@ char *file_read(const char *path)
     int length = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    char *result = calloc(length + 1, 1);
-    unsigned int result_len = fread(result, 1, length, file);
+    char *result = malloc(length + 1);
+    unsigned int result_len = fread(result, length, 1, file);
+    result[length] = 0;
+
+    fclose(file);
 
     if (result_len != length)
         return NULL;

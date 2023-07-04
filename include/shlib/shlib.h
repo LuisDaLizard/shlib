@@ -9,8 +9,18 @@
 
 typedef struct
 {
+    float x, y;
+} Vec2;
+
+typedef struct
+{
     float x, y, z;
 } Vec3;
+
+typedef struct
+{
+    float x, y, z, w;
+} Vec4;
 
 typedef struct
 {
@@ -37,7 +47,7 @@ extern void window_toggle_fullscreen(void);
  *                   GRAPHICS FUNCTIONS                  *
  *********************************************************/
 
-extern void graphics_clear_screen(float color[4]);
+extern void graphics_clear_screen(Vec4 color);
 extern void graphics_begin_drawing(void);
 extern void graphics_end_drawing(void);
 //extern void graphics_draw_quad(void);

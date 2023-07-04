@@ -3,6 +3,8 @@ project(shlib C)
 
 set(CMAKE_C_STANDARD 90)
 
+option(BUILD_EXAMPLES "build example applications with the library" ON)
+
 add_subdirectory(libs/glfw)
 
 set(SOURCE
@@ -14,3 +16,7 @@ set(SOURCE
 add_library(shlib ${SOURCE})
 target_link_libraries(shlib glfw)
 target_include_directories(shlib PRIVATE src/glad/include libs/glfw/include)
+
+if (BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()

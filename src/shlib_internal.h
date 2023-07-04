@@ -18,13 +18,18 @@
 
 typedef struct
 {
+    float x, y;
+} Vec2;
+
+typedef struct
+{
     float x, y, z;
 } Vec3;
 
 typedef struct
 {
-    float x, y;
-} Vec2;
+    float x, y, z, w;
+} Vec4;
 
 typedef struct
 {
@@ -72,7 +77,7 @@ typedef struct
 {
     Matrix projection;
     Batch current_batch;
-    Shader base_shader;
+    Shader *base_shader;
 } Graphics;
 
 /*********************************************************
@@ -90,7 +95,7 @@ void window_toggle_fullscreen(void);
  *                   GRAPHICS FUNCTIONS                  *
  *********************************************************/
 
-void graphics_clear_screen(float color[4]);
+void graphics_clear_screen(Vec4 color);
 void graphics_begin_drawing(void);
 void graphics_end_drawing(void);
 void graphics_draw_quad(void);
@@ -102,6 +107,8 @@ void graphics_draw_quad(void);
 Shader *shader_load_from_memory(const char *vertex_src, const char *fragment_src);
 Shader *shader_load_from_file(const char *vertex_path, const char *fragment_path);
 void shader_unload(Shader *shader);
+
+void shader_use(Shader *shader);
 
 /*********************************************************
  *                  CORE MATH FUNCTIONS                  *
