@@ -80,6 +80,25 @@ typedef struct
     Shader *base_shader;
 } Graphics;
 
+typedef struct
+{
+    Vertex *vertices;
+    unsigned int *indices;
+
+    int num_vertices;
+    int num_indices;
+
+    unsigned int vao;
+    unsigned int vbo;
+    unsigned int ebo;
+} Mesh;
+
+typedef struct
+{
+    Mesh *meshes;
+    int num_meshes;
+} Model;
+
 /*********************************************************
  *                    WINDOW FUNCTIONS                   *
  *********************************************************/
@@ -107,8 +126,22 @@ void graphics_draw_demo(void);
 Shader *shader_load_from_memory(const char *vertex_src, const char *fragment_src);
 Shader *shader_load_from_file(const char *vertex_path, const char *fragment_path);
 void shader_unload(Shader *shader);
-
 void shader_use(Shader *shader);
+
+/*********************************************************
+ *                     MESH FUNCTIONS                    *
+ *********************************************************/
+
+Mesh mesh_create(Vertex *vertices, unsigned int *indices, int num_vertices, int num_indices);
+void mesh_setup(Mesh *mesh);
+
+/*********************************************************
+ *                    MODEL FUNCTIONS                    *
+ *********************************************************/
+
+Model model_load_from_mesh(Mesh mesh);
+Model model_load_from_file(const char *path);
+void model_draw(Model model);
 
 /*********************************************************
  *                  CORE MATH FUNCTIONS                  *
@@ -137,14 +170,6 @@ Matrix matrix_translate(Matrix matrix, Vec3 translation);
 
 Matrix matrix_ortho(float left, float right, float top, float bottom, float near, float far);
 Matrix matrix_look_at(Vec3 eye, Vec3 target);
-
-/*********************************************************
- *                    BATCH FUNCTIONS                    *
- *********************************************************/
-
-Batch *batch_create(int max_quads);
-void batch_flush(Batch *batch);
-void batch_add_quad(Batch *batch);
 
 /*********************************************************
  *                 FILE UTILITY FUNCTIONS                *

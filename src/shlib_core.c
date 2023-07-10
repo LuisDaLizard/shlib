@@ -111,13 +111,10 @@ void graphics_clear_screen(Vec4 color)
 void graphics_begin_drawing(void)
 {
     window_poll_events();
-    graphics.projection = matrix_ortho(-1, 1, -1, 1, 0.01f, 1000.0f);
-    graphics.current_batch = batch_create(1000);
 }
 
 void graphics_end_drawing(void)
 {
-    batch_flush(graphics.current_batch);
     window_swap_buffers();
 }
 
@@ -215,72 +212,67 @@ void shader_use(Shader *shader)
 }
 
 /*********************************************************
- *                     BATCH FUNCTIONS                   *
+ *                     MESH FUNCTIONS                    *
  *********************************************************/
 
-Batch batch_create(int max_quads)
+Mesh mesh_create(Vertex *vertices, unsigned int *indices, int num_vertices, int num_indices)
 {
-    Batch result = { 0 };
-    result.max_quads = max_quads;
+    Mesh result = { 0 };
 
-    result.vertices = malloc(sizeof(Vertex) * max_quads * 4);
-    result.indices = malloc(sizeof(unsigned int) * max_quads * 6);
+    result.vertices = vertices;
+    result.indices = indices;
+    result.num_vertices = num_vertices;
+    result.num_indices = num_indices;
 
-    int i, j = 0;
-    for (i = 0; i < max_quads * 6; i += 6)
-    {
-        result.indices[i + 0] = j + 0;
-        result.indices[i + 1] = j + 1;
-        result.indices[i + 2] = j + 2;
-
-        result.indices[i + 3] = j + 2;
-        result.indices[i + 4] = j + 3;
-        result.indices[i + 5] = j + 0;
-
-        j += 4;
-    }
-
-    glGenVertexArrays(1, &result.vao);
-    glBindVertexArray(result.vao);
-
-    glGenBuffers(1, &result.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, result.vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * max_quads * 4, 0, GL_DYNAMIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)sizeof(Vec3));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(Vec3) + sizeof(Vec3)));
-    glEnableVertexAttribArray(2);
-
-    glGenBuffers(1, &result.ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, result.ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * max_quads * 6, result.indices, GL_STATIC_DRAW);
-
-    glBindVertexArray(0);
+    mesh_setup(&result);
 
     return result;
 }
 
-void batch_flush(Batch batch)
+void mesh_setup(Mesh *mesh)
 {
-    if (batch.num_triangles == 0)
-        return;
+    glGenVertexArrays(1, &mesh.vao);
+    glGenBuffers(1, &mesh.vbo);
+    glGenBuffers(1, &mesh.ebo);
 
-    glBindBuffer(GL_ARRAY_BUFFER, batch.vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, batch.num_vertices * sizeof(Vertex), batch.vertices);
+    glBindVertexArray(mesh.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
 
-    glUseProgram(graphics.base_shader->id);
-    // upload uniforms
-    glBindVertexArray(batch.vao);
-    glDrawElements(GL_TRIANGLES, batch.num_triangles, GL_UNSIGNED_INT, (void *)0);
+    glBufferData(GL_ARRAY_BUFFER, mesh.num_vertices * sizeof(Vertex), &mesh.vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.num_indices * sizeof(unsigned int), &mesh.indices, GL_STATIC_DRAW);
+
+    // vertex positions
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    // vertex normals
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)sizeof(Vec3));
+    // vertex texture coords
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(2 * sizeof(Vec3)));
+
     glBindVertexArray(0);
+}
 
-    free(batch.vertices);
-    free(batch.indices);
+/*********************************************************
+ *                    MODEL FUNCTIONS                    *
+ *********************************************************/
+
+Model model_load_from_mesh(Mesh mesh)
+{
+
+}
+
+Model model_load_from_file(const char *path)
+{
+
+}
+
+void model_draw(Model model)
+{
+
 }
 
 /*********************************************************
