@@ -121,7 +121,7 @@ void graphics_end_drawing(void)
     window_swap_buffers();
 }
 
-void graphics_draw_quad(void)
+void graphics_draw_demo(void)
 {
 
 }
@@ -267,7 +267,17 @@ Batch batch_create(int max_quads)
 
 void batch_flush(Batch batch)
 {
+    if (batch.num_triangles == 0)
+        return;
 
+    glBindBuffer(GL_ARRAY_BUFFER, batch.vbo);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, batch.num_vertices * sizeof(Vertex), batch.vertices);
+
+    glUseProgram(graphics.base_shader->id);
+    // upload uniforms
+    glBindVertexArray(batch.vao);
+    glDrawElements(GL_TRIANGLES, batch.num_triangles, GL_UNSIGNED_INT, (void *)0);
+    glBindVertexArray(0);
 
     free(batch.vertices);
     free(batch.indices);

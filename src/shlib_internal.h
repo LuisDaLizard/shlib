@@ -98,7 +98,7 @@ void window_toggle_fullscreen(void);
 void graphics_clear_screen(Vec4 color);
 void graphics_begin_drawing(void);
 void graphics_end_drawing(void);
-void graphics_draw_quad(void);
+void graphics_draw_demo(void);
 
 /*********************************************************
  *                    SHADER FUNCTIONS                   *
@@ -142,8 +142,9 @@ Matrix matrix_look_at(Vec3 eye, Vec3 target);
  *                    BATCH FUNCTIONS                    *
  *********************************************************/
 
-Batch batch_create(int max_quads);
-void batch_flush(Batch batch);
+Batch *batch_create(int max_quads);
+void batch_flush(Batch *batch);
+void batch_add_quad(Batch *batch);
 
 /*********************************************************
  *                 FILE UTILITY FUNCTIONS                *
