@@ -28,12 +28,15 @@ void window_init(int width, int height, const char *title)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+    glfwWindowHint(GLFW_SAMPLES, 8);
 
     window.monitor = glfwGetPrimaryMonitor();
     window.handle = glfwCreateWindow(window.width, window.height, title, 0, 0);
 
     if (!window.handle)
         exit(-1);
+
+    glfwSetWindowSizeCallback(window.handle, &window_resize_callback);
 
     glfwMakeContextCurrent(window.handle);
 
@@ -98,6 +101,18 @@ void window_toggle_fullscreen(void)
     }
 }
 
+Vec2 window_get_size(void)
+{
+    return (Vec2){(float)window.width, (float)window.height};
+}
+
+void window_resize_callback(GLFWwindow *handle, int width, int height)
+{
+    window.width = width;
+    window.height = height;
+    glViewport(0, 0, width, height);
+}
+
 /*********************************************************
  *                   GRAPHICS FUNCTIONS                  *
  *********************************************************/
@@ -110,17 +125,14 @@ void graphics_clear_screen(Vec4 color)
 
 void graphics_begin_drawing(void)
 {
+    glEnable(GL_DEPTH_TEST);
     window_poll_events();
 }
 
 void graphics_end_drawing(void)
 {
+    glDisable(GL_DEPTH_TEST);
     window_swap_buffers();
-}
-
-void graphics_draw_demo(void)
-{
-
 }
 
 /*********************************************************
@@ -211,37 +223,60 @@ void shader_use(Shader *shader)
     glUseProgram(shader->id);
 }
 
+int shader_get_location(Shader *shader, const char *name)
+{
+    return glGetUniformLocation(shader->id, name);
+}
+
+void shader_set_uniform_vec3(Shader *shader, int location, Vec3 value)
+{
+    glUseProgram(shader->id);
+    glUniform3f(location, value.x, value.y, value.z);
+    glUseProgram(0);
+}
+
+void shader_set_uniform_matrix(Shader *shader, int location, Matrix value)
+{
+    glUseProgram(shader->id);
+    glUniformMatrix4fv(location, 1, GL_TRUE, (float*)&value);
+    glUseProgram(0);
+}
+
 /*********************************************************
  *                     MESH FUNCTIONS                    *
  *********************************************************/
 
-Mesh mesh_create(Vertex *vertices, unsigned int *indices, int num_vertices, int num_indices)
+Mesh *mesh_create(Vertex *vertices, unsigned int *indices, int num_vertices, int num_indices)
 {
-    Mesh result = { 0 };
+    Mesh *result = calloc(1, sizeof(Mesh));
 
-    result.vertices = vertices;
-    result.indices = indices;
-    result.num_vertices = num_vertices;
-    result.num_indices = num_indices;
+    result->vertices = malloc(sizeof(Vertex) * num_vertices);
+    result->indices = malloc(sizeof(unsigned int) * num_indices);
 
-    mesh_setup(&result);
+    memcpy(result->vertices, vertices, sizeof(Vertex) * num_vertices);
+    memcpy(result->indices, indices, sizeof(unsigned int) * num_indices);
+
+    result->num_vertices = num_vertices;
+    result->num_indices = num_indices;
+
+    mesh_setup(result);
 
     return result;
 }
 
 void mesh_setup(Mesh *mesh)
 {
-    glGenVertexArrays(1, &mesh.vao);
-    glGenBuffers(1, &mesh.vbo);
-    glGenBuffers(1, &mesh.ebo);
+    glGenVertexArrays(1, &mesh->vao);
+    glGenBuffers(1, &mesh->vbo);
+    glGenBuffers(1, &mesh->ebo);
 
-    glBindVertexArray(mesh.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+    glBindVertexArray(mesh->vao);
 
-    glBufferData(GL_ARRAY_BUFFER, mesh.num_vertices * sizeof(Vertex), &mesh.vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+    glBufferData(GL_ARRAY_BUFFER, mesh->num_vertices * sizeof(Vertex), mesh->vertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.num_indices * sizeof(unsigned int), &mesh.indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->num_indices * sizeof(unsigned int), mesh->indices, GL_STATIC_DRAW);
 
     // vertex positions
     glEnableVertexAttribArray(0);
@@ -256,23 +291,67 @@ void mesh_setup(Mesh *mesh)
     glBindVertexArray(0);
 }
 
+void mesh_destroy(Mesh *mesh)
+{
+    if (!mesh)
+        return;
+
+    if (mesh->vertices)
+        free(mesh->vertices);
+    if (mesh->indices)
+        free(mesh->indices);
+
+    glDeleteBuffers(1, &mesh->vbo);
+    glDeleteBuffers(1, &mesh->ebo);
+    glDeleteVertexArrays(1, &mesh->vao);
+
+    free(mesh);
+    mesh = 0;
+}
+
 /*********************************************************
  *                    MODEL FUNCTIONS                    *
  *********************************************************/
 
-Model model_load_from_mesh(Mesh mesh)
+Model model_load_from_mesh(Mesh *mesh)
 {
+    Model result;
 
+    result.meshes = malloc(sizeof(Mesh));
+    result.meshes[0] = *mesh;
+    result.num_meshes = 1;
+
+    return result;
 }
 
 Model model_load_from_file(const char *path)
 {
+    Model result = { 0 };
 
+    return result;
 }
 
 void model_draw(Model model)
 {
+    int i;
+    for (i = 0; i < model.num_meshes; i++)
+    {
+        glBindVertexArray(model.meshes[i].vao);
+        glDrawElements(GL_TRIANGLES, model.meshes[i].num_indices, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
+}
 
+void model_unload(Model model)
+{
+    if (!model.meshes)
+        return;
+
+    int i;
+    for (i = 0; i < model.num_meshes; i++)
+        mesh_destroy(&model.meshes[i]);
+
+    free(model.meshes);
 }
 
 /*********************************************************

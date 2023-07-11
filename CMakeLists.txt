@@ -13,6 +13,8 @@ set(SOURCE
         src/shlib_math.c
         )
 
+set(SHLIB_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 add_library(shlib ${SOURCE})
 target_link_libraries(shlib glfw)
 target_include_directories(shlib PRIVATE src/glad/include libs/glfw/include)

@@ -24,11 +24,26 @@ typedef struct
 
 typedef struct
 {
+    Vec3 position;
+    Vec3 normal;
+    Vec2 tex_coord;
+} Vertex;
+
+typedef struct
+{
     float m00, m01, m02, m03;
     float m10, m11, m12, m13;
     float m20, m21, m22, m23;
     float m30, m31, m32, m33;
 } Matrix;
+
+typedef void Mesh;
+
+typedef struct
+{
+    Mesh *meshes;
+    int num_meshes;
+} Model; // TODO: Hide Model from user
 
 typedef void Shader;
 
@@ -42,6 +57,7 @@ extern bool window_should_close(void);
 extern void window_poll_events(void);
 extern void window_swap_buffers(void);
 extern void window_toggle_fullscreen(void);
+extern Vec2 window_get_size(void);
 
 /*********************************************************
  *                   GRAPHICS FUNCTIONS                  *
@@ -50,7 +66,6 @@ extern void window_toggle_fullscreen(void);
 extern void graphics_clear_screen(Vec4 color);
 extern void graphics_begin_drawing(void);
 extern void graphics_end_drawing(void);
-//extern void graphics_draw_quad(void);
 
 /*********************************************************
  *                    SHADER FUNCTIONS                   *
@@ -59,6 +74,26 @@ extern void graphics_end_drawing(void);
 extern Shader *shader_load_from_memory(const char *vertex_src, const char *fragment_src);
 extern Shader *shader_load_from_file(const char *vertex_path, const char *fragment_path);
 extern void shader_unload(Shader *shader);
+extern void shader_use(Shader *shader);
+extern int shader_get_location(Shader *shader, const char *name);
+extern void shader_set_uniform_vec3(Shader *shader, int location, Vec3 value);
+extern void shader_set_uniform_matrix(Shader *shader, int location, Matrix value);
+
+/*********************************************************
+ *                     MESH FUNCTIONS                    *
+ *********************************************************/
+
+extern Mesh *mesh_create(Vertex *vertices, unsigned int *indices, int num_vertices, int num_indices);
+extern void mesh_destroy(Mesh *mesh);
+
+/*********************************************************
+ *                    MODEL FUNCTIONS                    *
+ *********************************************************/
+
+extern Model model_load_from_mesh(Mesh *mesh);
+extern Model model_load_from_file(const char *path);
+extern void model_draw(Model model);
+extern void model_unload(Model model);
 
 /*********************************************************
  *                  CORE MATH FUNCTIONS                  *
@@ -84,7 +119,9 @@ extern Matrix matrix_translate(Matrix matrix, Vec3 translation);
 /*********************************************************
  *           MATRIX PROJECTION & VIEW FUNCTIONS          *
  *********************************************************/
+
 extern Matrix matrix_ortho(float left, float right, float top, float bottom, float near, float far);
+extern Matrix matrix_perspective(float aspect, float fov, float near, float far);
 //extern Matrix matrix_look_at(Vec3 eye, Vec3 target);
 
 /*********************************************************

@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <memory.h>
 
 /*********************************************************
  *                       STRUCTURES                      *
@@ -109,6 +110,9 @@ bool window_should_close(void);
 void window_poll_events(void);
 void window_swap_buffers(void);
 void window_toggle_fullscreen(void);
+Vec2 window_get_size(void);
+
+void window_resize_callback(GLFWwindow *handle, int width, int height);
 
 /*********************************************************
  *                   GRAPHICS FUNCTIONS                  *
@@ -127,21 +131,26 @@ Shader *shader_load_from_memory(const char *vertex_src, const char *fragment_src
 Shader *shader_load_from_file(const char *vertex_path, const char *fragment_path);
 void shader_unload(Shader *shader);
 void shader_use(Shader *shader);
+int shader_get_location(Shader *shader, const char *name);
+void shader_set_uniform_vec3(Shader *shader, int location, Vec3 value);
+void shader_set_uniform_matrix(Shader *shader, int location, Matrix value);
 
 /*********************************************************
  *                     MESH FUNCTIONS                    *
  *********************************************************/
 
-Mesh mesh_create(Vertex *vertices, unsigned int *indices, int num_vertices, int num_indices);
+Mesh *mesh_create(Vertex *vertices, unsigned int *indices, int num_vertices, int num_indices);
 void mesh_setup(Mesh *mesh);
+void mesh_destroy(Mesh *mesh);
 
 /*********************************************************
  *                    MODEL FUNCTIONS                    *
  *********************************************************/
 
-Model model_load_from_mesh(Mesh mesh);
+Model model_load_from_mesh(Mesh *mesh);
 Model model_load_from_file(const char *path);
 void model_draw(Model model);
+void model_unload(Model model);
 
 /*********************************************************
  *                  CORE MATH FUNCTIONS                  *
@@ -169,6 +178,7 @@ Matrix matrix_translate(Matrix matrix, Vec3 translation);
  *********************************************************/
 
 Matrix matrix_ortho(float left, float right, float top, float bottom, float near, float far);
+Matrix matrix_perspective(float aspect, float fov, float near, float far);
 Matrix matrix_look_at(Vec3 eye, Vec3 target);
 
 /*********************************************************

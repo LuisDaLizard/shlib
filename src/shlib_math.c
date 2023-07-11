@@ -161,3 +161,19 @@ Matrix matrix_ortho(float left, float right, float top, float bottom, float near
 
     return result;
 }
+
+Matrix matrix_perspective(float aspect, float fov, float near, float far)
+{
+    Matrix result = matrix_identity();
+
+    float tan_fov = tanf((fov * DEG2RAD) / 2.0f);
+
+    result.m00 = 1 / (aspect * tan_fov);
+    result.m11 = 1 / tan_fov;
+    result.m22 = -(far + near) / (far - near);
+    result.m33 = 0;
+    result.m23 = -(2 * far * near) / (far - near);
+    result.m32 = -1;
+
+    return result;
+}
