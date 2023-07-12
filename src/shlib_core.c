@@ -5,6 +5,10 @@
 
 #include "shlib_internal.h"
 
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 /*********************************************************
  *                        GLOBALS                        *
  *********************************************************/
@@ -318,7 +322,7 @@ Model *model_load_from_mesh(Mesh *mesh)
     Model *result = malloc(sizeof(Model));
 
     result->meshes = malloc(sizeof(Mesh *));
-    result->meshes[0] = mesh;
+    result->meshes[0] = *mesh;
     result->num_meshes = 1;
 
     return result;
@@ -326,9 +330,41 @@ Model *model_load_from_mesh(Mesh *mesh)
 
 Model *model_load_from_file(const char *path)
 {
-    Model *result = malloc(sizeof(Model));
+    Model *result = calloc(1, sizeof(Model));
+
+    unsigned int flags = aiProcess_Triangulate | aiProcess_FlipUVs |
+                         aiProcess_GenNormals | aiProcess_OptimizeMeshes |
+                         aiProcess_JoinIdenticalVertices;
+    const struct aiScene *scene = aiImportFile(path, flags);
+
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+    {
+        aiReleaseImport(scene);
+        return 0;
+    }
+
+    model_process_node(result, scene->mRootNode, scene);
+
+    aiReleaseImport(scene);
 
     return result;
+}
+
+void model_process_node(Model *model, struct aiNode *node, const struct aiScene *scene)
+{
+    model->num_meshes += node->mNumMeshes;
+    model->meshes = realloc(model->meshes, model->num_meshes * sizeof(Mesh *));
+
+    int i;
+    for (i = 0; i < node->mNumMeshes; i++)
+    {
+        struct aiMesh *ai_mesh = scene->mMeshes[i];
+    }
+}
+
+Mesh *model_process_mesh(Model *model, struct aiMesh *mesh, const struct aiScene *scene)
+{
+    return 0;
 }
 
 void model_draw(Model *model)
@@ -336,8 +372,8 @@ void model_draw(Model *model)
     int i;
     for (i = 0; i < model->num_meshes; i++)
     {
-        glBindVertexArray(model->meshes[i]->vao);
-        glDrawElements(GL_TRIANGLES, model->meshes[i]->num_indices, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(model->meshes[i].vao);
+        glDrawElements(GL_TRIANGLES, model->meshes[i].num_indices, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
 }
@@ -351,7 +387,7 @@ void model_unload(Model *model)
     {
         int i;
         for (i = 0; i < model->num_meshes; i++)
-            mesh_destroy(model->meshes[i]);
+            mesh_destroy(&model->meshes[i]);
         free(model->meshes);
     }
 

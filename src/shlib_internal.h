@@ -96,9 +96,13 @@ typedef struct
 
 typedef struct
 {
-    Mesh **meshes;
+    Mesh *meshes;
     int num_meshes;
 } Model;
+
+struct aiNode;
+struct aiMesh;
+struct aiScene;
 
 /*********************************************************
  *                    WINDOW FUNCTIONS                   *
@@ -151,6 +155,9 @@ Model *model_load_from_mesh(Mesh *mesh);
 Model *model_load_from_file(const char *path);
 void model_draw(Model *model);
 void model_unload(Model *model);
+
+void model_process_node(Model *model, struct aiNode *node, const struct aiScene *scene);
+Mesh *model_process_mesh(Model *model, struct aiMesh *mesh, const struct aiScene *scene);
 
 /*********************************************************
  *                  CORE MATH FUNCTIONS                  *
