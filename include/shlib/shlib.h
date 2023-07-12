@@ -38,13 +38,7 @@ typedef struct
 } Matrix;
 
 typedef void Mesh;
-
-typedef struct
-{
-    Mesh *meshes;
-    int num_meshes;
-} Model; // TODO: Hide Model from user
-
+typedef void Model;
 typedef void Shader;
 
 /*********************************************************
@@ -90,10 +84,10 @@ extern void mesh_destroy(Mesh *mesh);
  *                    MODEL FUNCTIONS                    *
  *********************************************************/
 
-extern Model model_load_from_mesh(Mesh *mesh);
-extern Model model_load_from_file(const char *path);
-extern void model_draw(Model model);
-extern void model_unload(Model model);
+extern Model *model_load_from_mesh(Mesh *mesh);
+extern Model *model_load_from_file(const char *path);
+extern void model_draw(Model *model);
+extern void model_unload(Model *model);
 
 /*********************************************************
  *                  CORE MATH FUNCTIONS                  *

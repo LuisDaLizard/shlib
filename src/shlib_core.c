@@ -313,45 +313,50 @@ void mesh_destroy(Mesh *mesh)
  *                    MODEL FUNCTIONS                    *
  *********************************************************/
 
-Model model_load_from_mesh(Mesh *mesh)
+Model *model_load_from_mesh(Mesh *mesh)
 {
-    Model result;
+    Model *result = malloc(sizeof(Model));
 
-    result.meshes = malloc(sizeof(Mesh));
-    result.meshes[0] = *mesh;
-    result.num_meshes = 1;
+    result->meshes = malloc(sizeof(Mesh));
+    result->meshes[0] = *mesh;
+    result->num_meshes = 1;
 
     return result;
 }
 
-Model model_load_from_file(const char *path)
+Model *model_load_from_file(const char *path)
 {
-    Model result = { 0 };
+    Model *result = malloc(sizeof(Model));
 
     return result;
 }
 
-void model_draw(Model model)
+void model_draw(Model *model)
 {
     int i;
-    for (i = 0; i < model.num_meshes; i++)
+    for (i = 0; i < model->num_meshes; i++)
     {
-        glBindVertexArray(model.meshes[i].vao);
-        glDrawElements(GL_TRIANGLES, model.meshes[i].num_indices, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(model->meshes[i].vao);
+        glDrawElements(GL_TRIANGLES, model->meshes[i].num_indices, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
 }
 
-void model_unload(Model model)
+void model_unload(Model *model)
 {
-    if (!model.meshes)
+    if (!model)
         return;
 
-    int i;
-    for (i = 0; i < model.num_meshes; i++)
-        mesh_destroy(&model.meshes[i]);
+    if (model->meshes)
+    {
+        int i;
+        for (i = 0; i < model->num_meshes; i++)
+            mesh_destroy(&model->meshes[i]);
+        free(model->meshes);
+    }
 
-    free(model.meshes);
+    free(model);
+    model = 0;
 }
 
 /*********************************************************

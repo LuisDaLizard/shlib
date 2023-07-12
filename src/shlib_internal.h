@@ -147,10 +147,10 @@ void mesh_destroy(Mesh *mesh);
  *                    MODEL FUNCTIONS                    *
  *********************************************************/
 
-Model model_load_from_mesh(Mesh *mesh);
-Model model_load_from_file(const char *path);
-void model_draw(Model model);
-void model_unload(Model model);
+Model *model_load_from_mesh(Mesh *mesh);
+Model *model_load_from_file(const char *path);
+void model_draw(Model *model);
+void model_unload(Model *model);
 
 /*********************************************************
  *                  CORE MATH FUNCTIONS                  *
