@@ -317,8 +317,8 @@ Model *model_load_from_mesh(Mesh *mesh)
 {
     Model *result = malloc(sizeof(Model));
 
-    result->meshes = malloc(sizeof(Mesh));
-    result->meshes[0] = *mesh;
+    result->meshes = malloc(sizeof(Mesh *));
+    result->meshes[0] = mesh;
     result->num_meshes = 1;
 
     return result;
@@ -336,8 +336,8 @@ void model_draw(Model *model)
     int i;
     for (i = 0; i < model->num_meshes; i++)
     {
-        glBindVertexArray(model->meshes[i].vao);
-        glDrawElements(GL_TRIANGLES, model->meshes[i].num_indices, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(model->meshes[i]->vao);
+        glDrawElements(GL_TRIANGLES, model->meshes[i]->num_indices, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
 }
@@ -351,7 +351,7 @@ void model_unload(Model *model)
     {
         int i;
         for (i = 0; i < model->num_meshes; i++)
-            mesh_destroy(&model->meshes[i]);
+            mesh_destroy(model->meshes[i]);
         free(model->meshes);
     }
 
