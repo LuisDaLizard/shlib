@@ -106,6 +106,17 @@ extern void matrix_print(Matrix matrix);
 extern void vec3_print(Vec3 vector);
 
 /*********************************************************
+ *            VECTOR TRANSFORMATION FUNCTIONS            *
+ *********************************************************/
+
+extern Vec3 vec3_add(Vec3 left, Vec3 right);
+extern Vec3 vec3_sub(Vec3 left, Vec3 right);
+extern float vec3_dot(Vec3 left, Vec3 right);
+extern Vec3 vec3_normalize(Vec3 vector);
+extern Vec3 vec3_cross(Vec3 left, Vec3 right);
+extern Vec3 vec3_negate(Vec3 vector);
+
+/*********************************************************
  *            MATRIX TRANSFORMATION FUNCTIONS            *
  *********************************************************/
 
@@ -122,7 +133,7 @@ extern Matrix matrix_translate(Matrix matrix, Vec3 translation);
 
 extern Matrix matrix_ortho(float left, float right, float top, float bottom, float near, float far);
 extern Matrix matrix_perspective(float aspect, float fov, float near, float far);
-//extern Matrix matrix_look_at(Vec3 eye, Vec3 target);
+extern Matrix matrix_look_at(Vec3 eye, Vec3 target, Vec3 up);
 
 /*********************************************************
  *                 FILE UTILITY FUNCTIONS                *

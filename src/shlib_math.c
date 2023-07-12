@@ -147,6 +147,64 @@ void vec3_print(Vec3 vector)
     printf("(%f, %f, %f)\n", vector.x, vector.y, vector.z);
 }
 
+/*********************************************************
+ *            VECTOR TRANSFORMATION FUNCTIONS            *
+ *********************************************************/
+
+Vec3 vec3_add(Vec3 left, Vec3 right)
+{
+    left.x += right.x;
+    left.y += right.y;
+    left.z += right.z;
+
+    return left;
+}
+
+Vec3 vec3_sub(Vec3 left, Vec3 right)
+{
+    left.x -= right.x;
+    left.y -= right.y;
+    left.z -= right.z;
+
+    return left;
+}
+
+float vec3_dot(Vec3 left, Vec3 right)
+{
+    return left.x * right.x + left.y * right.y + left.z * right.z;
+}
+
+Vec3 vec3_normalize(Vec3 vector)
+{
+    float magnitude = sqrtf(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+
+    vector.x /= magnitude;
+    vector.y /= magnitude;
+    vector.z /= magnitude;
+
+    return vector;
+}
+
+Vec3 vec3_cross(Vec3 left, Vec3 right)
+{
+    Vec3 result = {};
+
+    result.x = left.y * right.z - left.z * right.y;
+    result.y = left.z * right.x - left.x * right.z;
+    result.z = left.x * right.y - left.y * right.x;
+
+    return result;
+}
+
+Vec3 vec3_negate(Vec3 vector)
+{
+    vector.x = -vector.x;
+    vector.y = -vector.y;
+    vector.z = -vector.z;
+
+    return vector;
+}
+
 Matrix matrix_ortho(float left, float right, float top, float bottom, float near, float far)
 {
     Matrix result = matrix_identity();
@@ -174,6 +232,36 @@ Matrix matrix_perspective(float aspect, float fov, float near, float far)
     result.m33 = 0;
     result.m23 = -(2 * far * near) / (far - near);
     result.m32 = -1;
+
+    return result;
+}
+
+Matrix matrix_look_at(Vec3 eye, Vec3 target, Vec3 up)
+{
+    Matrix result = { 0 };
+
+    Vec3 zaxis = vec3_normalize(vec3_sub(target, eye));
+    Vec3 xaxis = vec3_normalize(vec3_cross(zaxis, up));
+    Vec3 yaxis = vec3_cross(xaxis, zaxis);
+
+    zaxis = vec3_negate(zaxis);
+
+    result.m00 = xaxis.x;
+    result.m01 = xaxis.y;
+    result.m02 = xaxis.z;
+    result.m03 = -vec3_dot(xaxis, eye);
+
+    result.m10 = yaxis.x;
+    result.m11 = yaxis.y;
+    result.m12 = yaxis.z;
+    result.m13 = -vec3_dot(yaxis, eye);
+
+    result.m20 = zaxis.x;
+    result.m21 = zaxis.y;
+    result.m22 = zaxis.z;
+    result.m23 = -vec3_dot(zaxis, eye);
+
+    result.m33 = 1;
 
     return result;
 }

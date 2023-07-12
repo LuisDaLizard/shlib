@@ -26,10 +26,11 @@ const char *vertex_src = "#version 400 core\n"
                          "\n"
                          "uniform mat4 uProjection;\n"
                          "uniform mat4 uModel;\n"
+                         "uniform mat4 uView;\n"
                          "\n"
                          "void main()\n"
                          "{\n"
-                         "    gl_Position = uProjection * uModel * vec4(aPosition, 1);\n"
+                         "    gl_Position = uProjection * uView * uModel * vec4(aPosition, 1);\n"
                          "}";
 const char *fragment_src = "#version 400 core\n"
                            "\n"
@@ -41,17 +42,18 @@ const char *fragment_src = "#version 400 core\n"
                            "}";
 
 Vec3 position = (Vec3){0, 0, 0};
-Vec3 scale = (Vec3){100, 100, 1};
-Vec3 rotation_dir = (Vec3){0, 0, 1};
-float rotation = 45.0f;
+Vec3 scale = (Vec3){2, 2, 2};
+Vec3 rotation_dir = (Vec3){0, 1, 0};
+float rotation = 15.0f;
 
 int main()
 {
-    window_init(800, 600, "Example 3 - 3D Cube");
+    window_init(800, 600, "Example 3 - 3D Space");
 
     Model cube = model_load_from_mesh(mesh_create(vertices, indices, 4, 6));
     Shader *shader = shader_load_from_memory(vertex_src, fragment_src);
     int projection_loc = shader_get_location(shader, "uProjection");
+    int view_loc = shader_get_location(shader, "uView");
     int model_loc = shader_get_location(shader, "uModel");
 
     while(!window_should_close())
@@ -59,17 +61,19 @@ int main()
         graphics_begin_drawing();
         graphics_clear_screen((Vec4){0.1f, 0.1f, 0.1f, 1});
 
-        rotation += 0.1f;
-        position.x += 0.1f;
+        rotation += 0.5f;
 
         Vec2 window_size = window_get_size();
-        Matrix projection = matrix_ortho(-window_size.x / 2.0f, window_size.x / 2.0f, window_size.y / 2.0f, -window_size.y / 2.0f, 0.0f, 1.0f);
+        Matrix projection = matrix_perspective(window_size.x / window_size.y, 90.0f, 0.01f, 1000.0f);
         shader_set_uniform_matrix(shader, projection_loc, projection);
 
+        Matrix view = matrix_look_at((Vec3){0, 5, 10}, (Vec3){0, 0, 0}, (Vec3){0, 1, 0});
+        shader_set_uniform_matrix(shader, view_loc, view);
+
         Matrix model = matrix_identity();
-        model = matrix_translate(model, position);
-        model = matrix_rotate(model, rotation_dir, rotation);
         model = matrix_scale(model, scale);
+        model = matrix_rotate(model, rotation_dir, rotation);
+        model = matrix_translate(model, position);
         shader_set_uniform_matrix(shader, model_loc, model);
 
         shader_use(shader);
