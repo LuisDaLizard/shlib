@@ -96,7 +96,7 @@ typedef struct
 
 typedef struct
 {
-    Mesh *meshes;
+    Mesh **meshes;
     int num_meshes;
 } Model;
 

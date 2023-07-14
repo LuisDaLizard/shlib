@@ -78,6 +78,7 @@ extern void shader_set_uniform_matrix(Shader *shader, int location, Matrix value
  *********************************************************/
 
 extern Mesh *mesh_create(Vertex *vertices, unsigned int *indices, int num_vertices, int num_indices);
+extern Mesh *mesh_gen_cube(Vec3 scale);
 extern void mesh_destroy(Mesh *mesh);
 
 /*********************************************************

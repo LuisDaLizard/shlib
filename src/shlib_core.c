@@ -26,7 +26,9 @@ void window_init(int width, int height, const char *title)
     window.height = height;
 
     if (!glfwInit())
-        exit(-1);
+    {
+        return;
+    }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -322,7 +324,7 @@ Model *model_load_from_mesh(Mesh *mesh)
     Model *result = malloc(sizeof(Model));
 
     result->meshes = malloc(sizeof(Mesh *));
-    result->meshes[0] = *mesh;
+    result->meshes[0] = mesh;
     result->num_meshes = 1;
 
     return result;
@@ -330,18 +332,16 @@ Model *model_load_from_mesh(Mesh *mesh)
 
 Model *model_load_from_file(const char *path)
 {
-    Model *result = calloc(1, sizeof(Model));
-
-    unsigned int flags = aiProcess_Triangulate | aiProcess_FlipUVs |
-                         aiProcess_GenNormals | aiProcess_OptimizeMeshes |
-                         aiProcess_JoinIdenticalVertices;
+    unsigned int flags = aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_OptimizeMeshes;
     const struct aiScene *scene = aiImportFile(path, flags);
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        aiReleaseImport(scene);
         return 0;
     }
+
+    Model *result = malloc(sizeof(Model));
+    result->num_meshes = 0;
 
     model_process_node(result, scene->mRootNode, scene);
 
@@ -352,19 +352,66 @@ Model *model_load_from_file(const char *path)
 
 void model_process_node(Model *model, struct aiNode *node, const struct aiScene *scene)
 {
-    model->num_meshes += node->mNumMeshes;
-    model->meshes = realloc(model->meshes, model->num_meshes * sizeof(Mesh *));
-
-    int i;
-    for (i = 0; i < node->mNumMeshes; i++)
+    Mesh **meshes = realloc(model->meshes, (model->num_meshes + node->mNumMeshes) * sizeof(Mesh *));
+    if (!meshes)
     {
-        struct aiMesh *ai_mesh = scene->mMeshes[i];
+        printf("No Memory!\n");
+        return;
     }
+
+    model->meshes = meshes;
+
+    for (int i = 0; i < node->mNumMeshes; i++)
+    {
+        struct aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+        model->meshes[model->num_meshes + i] = model_process_mesh(model, mesh, scene);
+    }
+
+    model->num_meshes += node->mNumMeshes;
+
+    for (int i = 0; i < node->mNumChildren; i++)
+        model_process_node(model, node->mChildren[i], scene);
 }
 
 Mesh *model_process_mesh(Model *model, struct aiMesh *mesh, const struct aiScene *scene)
 {
-    return 0;
+    Vertex *vertices = malloc(mesh->mNumVertices * sizeof(Vertex));
+    unsigned int *indices = malloc(mesh->mNumFaces * 3 * sizeof(unsigned int));
+
+    for (int i = 0; i < mesh->mNumVertices; i++)
+    {
+        vertices[i].position.x = mesh->mVertices[i].x;
+        vertices[i].position.y = mesh->mVertices[i].y;
+        vertices[i].position.z = mesh->mVertices[i].z;
+
+        vertices[i].normal.x = mesh->mNormals[i].x;
+        vertices[i].normal.y = mesh->mNormals[i].y;
+        vertices[i].normal.z = mesh->mNormals[i].z;
+
+        if (mesh->mTextureCoords[0])
+        {
+            vertices[i].tex_coord.x = mesh->mTextureCoords[0][i].x;
+            vertices[i].tex_coord.y = mesh->mTextureCoords[0][i].y;
+        }
+        else
+            vertices[i].tex_coord = (Vec2){0, 0};
+    }
+
+    for(unsigned int i = 0; i < mesh->mNumFaces; i++)
+    {
+        struct aiFace face = mesh->mFaces[i];
+
+        indices[i * 3 + 0] = face.mIndices[0];
+        indices[i * 3 + 1] = face.mIndices[1];
+        indices[i * 3 + 2] = face.mIndices[2];
+    }
+
+    Mesh *result = mesh_create(vertices, indices, mesh->mNumVertices, mesh->mNumFaces * 3);
+
+    free(vertices);
+    free(indices);
+
+    return result;
 }
 
 void model_draw(Model *model)
@@ -372,8 +419,8 @@ void model_draw(Model *model)
     int i;
     for (i = 0; i < model->num_meshes; i++)
     {
-        glBindVertexArray(model->meshes[i].vao);
-        glDrawElements(GL_TRIANGLES, model->meshes[i].num_indices, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(model->meshes[i]->vao);
+        glDrawElements(GL_TRIANGLES, model->meshes[i]->num_indices, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
 }
@@ -387,7 +434,7 @@ void model_unload(Model *model)
     {
         int i;
         for (i = 0; i < model->num_meshes; i++)
-            mesh_destroy(&model->meshes[i]);
+            mesh_destroy(model->meshes[i]);
         free(model->meshes);
     }
 
