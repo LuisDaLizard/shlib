@@ -158,7 +158,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
         std::size_t numTokens,
         unsigned int searchBytes /* = 200 */,
         bool tokensSol /* false */,
-        bool noGraphBeforeTokens /* false */) {
+        bool noAlphaBeforeTokens /* false */) {
     ai_assert(nullptr != tokens);
     ai_assert(0 != numTokens);
     ai_assert(0 != searchBytes);
@@ -207,9 +207,8 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
                 continue;
             }
             // We need to make sure that we didn't accidentally identify the end of another token as our token,
-            // e.g. in a previous version the "gltf " present in some gltf files was detected as "f ", or a
-            // Blender-exported glb file containing "Khronos glTF Blender I/O " was detected as "o "
-            if (noGraphBeforeTokens && (r != buffer && isgraph(static_cast<unsigned char>(r[-1])))) {
+            // e.g. in a previous version the "gltf " present in some gltf files was detected as "f "
+            if (noAlphaBeforeTokens && (r != buffer && isalpha(static_cast<unsigned char>(r[-1])))) {
                 continue;
             }
             // We got a match, either we don't care where it is, or it happens to
@@ -248,7 +247,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
     }
 
     if (ext2 && !ASSIMP_stricmp(ext_real, ext2)) {
-        return true;
+        return true;        
     }
 
     return false;

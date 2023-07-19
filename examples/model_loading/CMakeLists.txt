@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(model_loading C)
+project(model_loading CXX)
 
 add_executable(model_loading main.c)
 target_link_libraries(model_loading shlib)

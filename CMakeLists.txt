@@ -3,18 +3,16 @@ project(shlib C)
 
 set(CMAKE_C_STANDARD 23)
 
-option(BUILD_EXAMPLES "build example applications with the library" ON)
-
 set(SOURCE
         src/shlib_core.c
         src/shlib_math.c
+        src/shlib_memory.c
         )
 
 set(LIBS
         assimp
         glfw
         glad
-        opengl32
         )
 
 set(INCLUDES
@@ -32,6 +30,4 @@ add_library(shlib STATIC ${SOURCE})
 target_link_libraries(shlib ${LIBS})
 target_include_directories(shlib PRIVATE ${INCLUDES})
 
-if (BUILD_EXAMPLES)
-    add_subdirectory(examples)
-endif()
+add_subdirectory(examples)

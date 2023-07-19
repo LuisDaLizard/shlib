@@ -9,6 +9,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 /*********************************************************
  *                        GLOBALS                        *
  *********************************************************/
@@ -40,14 +43,14 @@ void window_init(int width, int height, const char *title)
     window.handle = glfwCreateWindow(window.width, window.height, title, 0, 0);
 
     if (!window.handle)
-        exit(-1);
+        return;
 
     glfwSetWindowSizeCallback(window.handle, &window_resize_callback);
 
     glfwMakeContextCurrent(window.handle);
 
     if (!gladLoadGLLoader((GLADloadproc)&glfwGetProcAddress))
-        exit(-1);
+        return;
 
     const char *vertex_src = "#version 400 core\n"
                              "\n"
