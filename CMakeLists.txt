@@ -6,7 +6,6 @@ set(CMAKE_C_STANDARD 23)
 set(SOURCE
         src/shlib_core.c
         src/shlib_math.c
-        src/shlib_memory.c
         )
 
 set(LIBS
