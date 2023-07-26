@@ -63,6 +63,10 @@ extern void graphics_begin_drawing(void);
 extern void graphics_end_drawing(void);
 extern void graphics_enable_wireframe(void);
 extern void graphics_disable_wireframe(void);
+extern void graphics_enable_backface_culling(void);
+extern void graphics_disable_backface_culling(void);
+extern void graphics_enable_alpha_blending(void);
+extern void graphics_disable_alpha_blending(void);
 
 /*********************************************************
  *                    SHADER FUNCTIONS                   *

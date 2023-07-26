@@ -47,12 +47,6 @@ void window_init(int width, int height, const char *title)
 
     if (!gladLoadGLLoader((GLADloadproc)&glfwGetProcAddress))
         return;
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
 }
 
 void window_destroy(void)
@@ -133,6 +127,29 @@ void graphics_enable_wireframe(void)
 void graphics_disable_wireframe(void)
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void graphics_enable_backface_culling(void)
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void graphics_disable_backface_culling(void)
+{
+    glDisable(GL_BLEND);
+}
+
+void graphics_enable_alpha_blending(void)
+{
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+}
+
+void graphics_disable_alpha_blending(void)
+{
+    glDisable(GL_CULL_FACE);
 }
 
 
