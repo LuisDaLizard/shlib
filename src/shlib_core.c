@@ -5,19 +5,15 @@
 
 #include "shlib_internal.h"
 
-#include <assimp/cimport.h>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <strings.h>
 
 /*********************************************************
  *                        GLOBALS                        *
  *********************************************************/
 
 Window window = { 0 };
-Graphics graphics = { 0 };
 
 /*********************************************************
  *                    WINDOW FUNCTIONS                   *
@@ -51,27 +47,6 @@ void window_init(int width, int height, const char *title)
 
     if (!gladLoadGLLoader((GLADloadproc)&glfwGetProcAddress))
         return;
-
-    const char *vertex_src = "#version 400 core\n"
-                             "\n"
-                             "layout (location = 0) in vec3 aPosition;\n"
-                             "layout (location = 1) in vec3 aNormal;\n"
-                             "layout (location = 2) in vec2 aTexCoord;\n"
-                             "\n"
-                             "void main()\n"
-                             "{\n"
-                             "    gl_Position = vec4(aPosition, 1);\n"
-                             "}";
-    const char *fragment_src = "#version 400 core\n"
-                               "\n"
-                               "out vec4 oColor;\n"
-                               "\n"
-                               "void main()\n"
-                               "{\n"
-                               "    oColor = vec4(1, 0, 1, 1);\n"
-                               "}";
-
-    graphics.base_shader = shader_load_from_memory(vertex_src, fragment_src);
 }
 
 void window_destroy(void)
@@ -144,36 +119,22 @@ void graphics_end_drawing(void)
     window_swap_buffers();
 }
 
+void graphics_enable_wireframe(void)
+{
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+}
+
+void graphics_disable_wireframe(void)
+{
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+
 /*********************************************************
  *                    SHADER FUNCTIONS                   *
  *********************************************************/
 
-Shader *shader_load_from_file(const char *vertex_path, const char *fragment_path)
-{
-    Shader *result = calloc(1, sizeof(Shader));
-    char *vertex_src, *fragment_src;
-
-    vertex_src = file_read(vertex_path);
-    fragment_src = file_read(fragment_path);
-
-    if (!vertex_src)
-        printf("Unable to read vertex shader file.\n");
-
-    if (!vertex_src)
-        printf("Unable to read fragment shader file.\n");
-
-    if (!vertex_src || !fragment_src)
-        return result;
-
-    result = shader_load_from_memory(vertex_src, fragment_src);
-
-    free(vertex_src);
-    free(fragment_src);
-
-    return result;
-}
-
-Shader *shader_load_from_memory(const char *vertex_src, const char *fragment_src)
+Shader *shader_load(const char *vertex_src, const char *fragment_src)
 {
     Shader *result = calloc(1, sizeof(Shader));
 
@@ -252,6 +213,57 @@ void shader_set_uniform_matrix(Shader *shader, int location, Matrix value)
 }
 
 /*********************************************************
+ *                   TEXTURE FUNCTIONS                   *
+ *********************************************************/
+
+Texture *texture_load(void *data, int width, int height, int channels)
+{
+    if (!data)
+        return NULL;
+
+    Texture *result = malloc(sizeof(Texture));
+
+    glGenTextures(1, &result->id);
+    glBindTexture(GL_TEXTURE_2D, result->id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    switch(channels)
+    {
+        case 3:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            break;
+        case 4:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            break;
+        default:
+            free(result);
+            return NULL;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return result;
+}
+
+void texture_unload(Texture *texture)
+{
+    free(texture);
+}
+
+void texture_use(Texture *texture, int slot)
+{
+    if (!texture || slot < 0 || slot > 15)
+        return;
+
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(GL_TEXTURE_2D, texture->id);
+}
+
+/*********************************************************
  *                     MESH FUNCTIONS                    *
  *********************************************************/
 
@@ -282,10 +294,10 @@ void mesh_setup(Mesh *mesh)
     glBindVertexArray(mesh->vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-    glBufferData(GL_ARRAY_BUFFER, mesh->num_vertices * sizeof(Vertex), mesh->vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, (long long)(mesh->num_vertices * sizeof(Vertex)), mesh->vertices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->num_indices * sizeof(unsigned int), mesh->indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long long)(mesh->num_indices * sizeof(unsigned int)), mesh->indices, GL_STATIC_DRAW);
 
     // vertex positions
     glEnableVertexAttribArray(0);
@@ -315,7 +327,6 @@ void mesh_destroy(Mesh *mesh)
     glDeleteVertexArrays(1, &mesh->vao);
 
     free(mesh);
-    mesh = 0;
 }
 
 /*********************************************************
@@ -329,90 +340,6 @@ Model *model_load_from_mesh(Mesh *mesh)
     result->meshes = malloc(sizeof(Mesh *));
     result->meshes[0] = mesh;
     result->num_meshes = 1;
-
-    return result;
-}
-
-Model *model_load_from_file(const char *path)
-{
-    unsigned int flags = aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_OptimizeMeshes;
-    const struct aiScene *scene = aiImportFile(path, flags);
-
-    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-    {
-        return 0;
-    }
-
-    Model *result = malloc(sizeof(Model));
-    result->num_meshes = 0;
-
-    model_process_node(result, scene->mRootNode, scene);
-
-    aiReleaseImport(scene);
-
-    return result;
-}
-
-void model_process_node(Model *model, struct aiNode *node, const struct aiScene *scene)
-{
-    Mesh **meshes = realloc(model->meshes, (model->num_meshes + node->mNumMeshes) * sizeof(Mesh *));
-    if (!meshes)
-    {
-        printf("No Memory!\n");
-        return;
-    }
-
-    model->meshes = meshes;
-
-    for (int i = 0; i < node->mNumMeshes; i++)
-    {
-        struct aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        model->meshes[model->num_meshes + i] = model_process_mesh(model, mesh, scene);
-    }
-
-    model->num_meshes += node->mNumMeshes;
-
-    for (int i = 0; i < node->mNumChildren; i++)
-        model_process_node(model, node->mChildren[i], scene);
-}
-
-Mesh *model_process_mesh(Model *model, struct aiMesh *mesh, const struct aiScene *scene)
-{
-    Vertex *vertices = malloc(mesh->mNumVertices * sizeof(Vertex));
-    unsigned int *indices = malloc(mesh->mNumFaces * 3 * sizeof(unsigned int));
-
-    for (int i = 0; i < mesh->mNumVertices; i++)
-    {
-        vertices[i].position.x = mesh->mVertices[i].x;
-        vertices[i].position.y = mesh->mVertices[i].y;
-        vertices[i].position.z = mesh->mVertices[i].z;
-
-        vertices[i].normal.x = mesh->mNormals[i].x;
-        vertices[i].normal.y = mesh->mNormals[i].y;
-        vertices[i].normal.z = mesh->mNormals[i].z;
-
-        if (mesh->mTextureCoords[0])
-        {
-            vertices[i].tex_coord.x = mesh->mTextureCoords[0][i].x;
-            vertices[i].tex_coord.y = mesh->mTextureCoords[0][i].y;
-        }
-        else
-            vertices[i].tex_coord = (Vec2){0, 0};
-    }
-
-    for(unsigned int i = 0; i < mesh->mNumFaces; i++)
-    {
-        struct aiFace face = mesh->mFaces[i];
-
-        indices[i * 3 + 0] = face.mIndices[0];
-        indices[i * 3 + 1] = face.mIndices[1];
-        indices[i * 3 + 2] = face.mIndices[2];
-    }
-
-    Mesh *result = mesh_create(vertices, indices, mesh->mNumVertices, mesh->mNumFaces * 3);
-
-    free(vertices);
-    free(indices);
 
     return result;
 }
@@ -442,31 +369,4 @@ void model_unload(Model *model)
     }
 
     free(model);
-    model = 0;
-}
-
-/*********************************************************
- *                 FILE UTILITY FUNCTIONS                *
- *********************************************************/
-
-char *file_read(const char *path)
-{
-    FILE *file = fopen(path, "r");
-    if (!file)
-        return NULL;
-
-    fseek(file, 0, SEEK_END);
-    int length = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    char *result = malloc(length + 1);
-    unsigned int result_len = fread(result, length, 1, file);
-    result[length] = 0;
-
-    fclose(file);
-
-    if (result_len != length)
-        return NULL;
-
-    return result;
 }

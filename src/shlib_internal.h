@@ -51,32 +51,23 @@ typedef struct
 
 typedef struct
 {
+    int width, height, channels;
+    unsigned int id;
+} Texture;
+
+typedef struct
+{
+
+} Framebuffer;
+
+typedef struct
+{
     GLFWwindow *handle;
     GLFWmonitor *monitor;
     int width;
     int height;
     bool fullscreen;
 } Window;
-
-typedef struct
-{
-    unsigned int vao, vbo, ebo;
-
-    unsigned int num_triangles;
-    unsigned int num_vertices;
-
-    unsigned int max_quads;
-
-    Vertex *vertices;
-    unsigned int *indices;
-} Batch;
-
-typedef struct
-{
-    Matrix projection;
-    Batch current_batch;
-    Shader *base_shader;
-} Graphics;
 
 typedef struct
 {
@@ -96,10 +87,6 @@ typedef struct
     Mesh **meshes;
     int num_meshes;
 } Model;
-
-struct aiNode;
-struct aiMesh;
-struct aiScene;
 
 /*********************************************************
  *                    WINDOW FUNCTIONS                   *
@@ -122,19 +109,27 @@ void window_resize_callback(GLFWwindow *handle, int width, int height);
 void graphics_clear_screen(Vec4 color);
 void graphics_begin_drawing(void);
 void graphics_end_drawing(void);
-void graphics_draw_demo(void);
+void graphics_enable_wireframe(void);
+void graphics_disable_wireframe(void);
 
 /*********************************************************
  *                    SHADER FUNCTIONS                   *
  *********************************************************/
 
-Shader *shader_load_from_memory(const char *vertex_src, const char *fragment_src);
-Shader *shader_load_from_file(const char *vertex_path, const char *fragment_path);
+Shader *shader_load(const char *vertex_src, const char *fragment_src);
 void shader_unload(Shader *shader);
 void shader_use(Shader *shader);
 int shader_get_location(Shader *shader, const char *name);
 void shader_set_uniform_vec3(Shader *shader, int location, Vec3 value);
 void shader_set_uniform_matrix(Shader *shader, int location, Matrix value);
+
+/*********************************************************
+ *                   TEXTURE FUNCTIONS                   *
+ *********************************************************/
+
+Texture *texture_load(void *data, int width, int height, int channels);
+void texture_unload(Texture *texture);
+void texture_use(Texture *texture, int slot);
 
 /*********************************************************
  *                     MESH FUNCTIONS                    *
@@ -149,12 +144,8 @@ void mesh_destroy(Mesh *mesh);
  *********************************************************/
 
 Model *model_load_from_mesh(Mesh *mesh);
-Model *model_load_from_file(const char *path);
 void model_draw(Model *model);
 void model_unload(Model *model);
-
-void model_process_node(Model *model, struct aiNode *node, const struct aiScene *scene);
-Mesh *model_process_mesh(Model *model, struct aiMesh *mesh, const struct aiScene *scene);
 
 /*********************************************************
  *                  CORE MATH FUNCTIONS                  *
@@ -196,10 +187,5 @@ Matrix matrix_ortho(float left, float right, float top, float bottom, float near
 Matrix matrix_perspective(float aspect, float fov, float near, float far);
 Matrix matrix_look_at(Vec3 eye, Vec3 target, Vec3 up);
 
-/*********************************************************
- *                 FILE UTILITY FUNCTIONS                *
- *********************************************************/
-
-char *file_read(const char *path);
 
 #endif //SHLIB_SHLIB_INTERNAL_H

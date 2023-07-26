@@ -6,16 +6,24 @@
 
 Vertex vertices[4] =
         {
-                {{100, 100, 0}}, // Top Right
-                {{100, -100, 0}},  // Bottom Right
-                {{-100, -100, 0}},   // Bottom Left
-                {{-100, 100, 0}}   // Top Left
+                {{100, 100, 0}, {}, {1, 1}}, // Top Right
+                {{100, -100, 0}, {}, {1, 0}},  // Bottom Right
+                {{-100, -100, 0}, {}, {0, 0}},   // Bottom Left
+                {{-100, 100, 0}, {}, {0, 1}}   // Top Left
         };
 
 unsigned int indices[6] =
         {
             0, 1, 3,
             1, 2, 3
+        };
+
+unsigned char image_data[16] =
+        {
+                0x00, 0x00, 0x00, 0xff, // Top Right
+                0x00, 0x00, 0xff, 0xff, // Top Left
+                0x00, 0xff, 0x00, 0xff, // Bottom Right
+                0xff, 0x00, 0x00, 0xff // Bottom Left
         };
 
 const char *vertex_src = "#version 400 core\n"
@@ -26,25 +34,33 @@ const char *vertex_src = "#version 400 core\n"
                          "\n"
                          "uniform mat4 uProjection;\n"
                          "\n"
+                         "out vec2 fTexCoord;\n"
+                         "\n"
                          "void main()\n"
                          "{\n"
+                         "    fTexCoord = aTexCoord;\n"
                          "    gl_Position = uProjection * vec4(aPosition, 1);\n"
                          "}";
 const char *fragment_src = "#version 400 core\n"
+                           "\n"
+                           "in vec2 fTexCoord;\n"
+                           "\n"
+                           "uniform sampler2D texture0;\n"
                            "\n"
                            "out vec4 oColor;\n"
                            "\n"
                            "void main()\n"
                            "{\n"
-                           "    oColor = vec4(1, 1, 1, 1);\n"
+                           "    oColor = texture(texture0, fTexCoord);\n"
                            "}";
 
 int main()
 {
-    window_init(800, 600, "Example 3 - 3D Cube");
+    window_init(800, 600, "Example 1 - First Quad");
 
     Model *quad = model_load_from_mesh(mesh_create(vertices, indices, 4, 6));
-    Shader *shader = shader_load_from_memory(vertex_src, fragment_src);
+    Shader *shader = shader_load(vertex_src, fragment_src);
+    Texture *texture = texture_load(image_data, 2, 2, 4);
     int projection_loc = shader_get_location(shader, "uProjection");
 
     while(!window_should_close())
@@ -57,6 +73,7 @@ int main()
         shader_set_uniform_matrix(shader, projection_loc, projection);
 
         shader_use(shader);
+        texture_use(texture, 0);
         model_draw(quad);
 
         graphics_end_drawing();
@@ -64,6 +81,7 @@ int main()
 
     shader_unload(shader);
     model_unload(quad);
+    texture_unload(texture);
 
     window_destroy();
 

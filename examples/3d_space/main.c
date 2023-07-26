@@ -51,7 +51,7 @@ int main()
     window_init(800, 600, "Example 3 - 3D Space");
 
     Model *cube = model_load_from_mesh(mesh_create(vertices, indices, 4, 6));
-    Shader *shader = shader_load_from_memory(vertex_src, fragment_src);
+    Shader *shader = shader_load(vertex_src, fragment_src);
     int projection_loc = shader_get_location(shader, "uProjection");
     int view_loc = shader_get_location(shader, "uView");
     int model_loc = shader_get_location(shader, "uModel");

@@ -40,6 +40,7 @@ typedef struct
 typedef void Mesh;
 typedef void Model;
 typedef void Shader;
+typedef void Texture;
 
 /*********************************************************
  *                    WINDOW FUNCTIONS                   *
@@ -60,18 +61,27 @@ extern Vec2 window_get_size(void);
 extern void graphics_clear_screen(Vec4 color);
 extern void graphics_begin_drawing(void);
 extern void graphics_end_drawing(void);
+extern void graphics_enable_wireframe(void);
+extern void graphics_disable_wireframe(void);
 
 /*********************************************************
  *                    SHADER FUNCTIONS                   *
  *********************************************************/
 
-extern Shader *shader_load_from_memory(const char *vertex_src, const char *fragment_src);
-extern Shader *shader_load_from_file(const char *vertex_path, const char *fragment_path);
+extern Shader *shader_load(const char *vertex_src, const char *fragment_src);
 extern void shader_unload(Shader *shader);
 extern void shader_use(Shader *shader);
 extern int shader_get_location(Shader *shader, const char *name);
 extern void shader_set_uniform_vec3(Shader *shader, int location, Vec3 value);
 extern void shader_set_uniform_matrix(Shader *shader, int location, Matrix value);
+
+/*********************************************************
+ *                   TEXTURE FUNCTIONS                   *
+ *********************************************************/
+
+extern Texture *texture_load(void *data, int width, int height, int channels);
+extern void texture_unload(Texture *texture);
+extern void texture_use(Texture *texture, int slot);
 
 /*********************************************************
  *                     MESH FUNCTIONS                    *
@@ -86,7 +96,6 @@ extern void mesh_destroy(Mesh *mesh);
  *********************************************************/
 
 extern Model *model_load_from_mesh(Mesh *mesh);
-extern Model *model_load_from_file(const char *path);
 extern void model_draw(Model *model);
 extern void model_unload(Model *model);
 
@@ -129,10 +138,5 @@ extern Matrix matrix_translate(Matrix matrix, Vec3 translation);
 extern Matrix matrix_ortho(float left, float right, float top, float bottom, float near, float far);
 extern Matrix matrix_perspective(float aspect, float fov, float near, float far);
 extern Matrix matrix_look_at(Vec3 eye, Vec3 target, Vec3 up);
-
-/*********************************************************
- *                 FILE UTILITY FUNCTIONS                *
- *********************************************************/
- extern char *file_read(const char *path);
 
 #endif //SHLIB_SHLIB_H
