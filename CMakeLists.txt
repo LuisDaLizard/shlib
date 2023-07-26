@@ -13,8 +13,7 @@ set(LIBS
 
 set(INCLUDES
         libs/glad/include
-        libs/glfw/include
-        libs/rres/include)
+        libs/glfw/include)
 
 set(SHLIB_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
