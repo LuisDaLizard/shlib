@@ -72,6 +72,11 @@ typedef struct
 
 typedef struct
 {
+    int mouse_x, mouse_y;
+} Input;
+
+typedef struct
+{
     Vertex *vertices;
     unsigned int *indices;
 
@@ -100,8 +105,18 @@ void window_poll_events(void);
 void window_swap_buffers(void);
 void window_toggle_fullscreen(void);
 Vec2 window_get_size(void);
+void window_disable_cursor(void);
+void window_enable_cursor(void);
 
 void window_resize_callback(GLFWwindow *handle, int width, int height);
+
+/*********************************************************
+ *                     INPUT FUNCTIONS                   *
+ *********************************************************/
+
+Vec2 input_get_mouse_pos(void);
+
+void input_mouse_pos_callback(GLFWwindow *handle, double x, double y);
 
 /*********************************************************
  *                   GRAPHICS FUNCTIONS                  *
@@ -143,7 +158,7 @@ void texture_use(Texture *texture, int slot);
 Framebuffer *framebuffer_create_depth(int width, int height);
 void framebuffer_destroy(Framebuffer *framebuffer);
 void framebuffer_bind(Framebuffer *framebuffer);
-void framebuffer_unbind();
+void framebuffer_unbind(void);
 Texture *framebuffer_get_texture(Framebuffer *framebuffer);
 
 /*********************************************************
@@ -166,7 +181,7 @@ void model_unload(Model *model);
  *                  CORE MATH FUNCTIONS                  *
  *********************************************************/
 
-Matrix matrix_identity();
+Matrix matrix_identity(void);
 Vec3 matrix_mul_vec3(Matrix left, Vec3 right);
 Matrix matrix_mul(Matrix left, Matrix right);
 void matrix_print(Matrix matrix);

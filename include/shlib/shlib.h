@@ -54,6 +54,14 @@ extern void window_poll_events(void);
 extern void window_swap_buffers(void);
 extern void window_toggle_fullscreen(void);
 extern Vec2 window_get_size(void);
+extern void window_disable_cursor(void);
+extern void window_enable_cursor(void);
+
+/*********************************************************
+ *                     INPUT FUNCTIONS                   *
+ *********************************************************/
+
+extern Vec2 input_get_mouse_pos(void);
 
 /*********************************************************
  *                   GRAPHICS FUNCTIONS                  *
@@ -95,7 +103,7 @@ extern void texture_use(Texture *texture, int slot);
 extern Framebuffer *framebuffer_create_depth(int width, int height);
 extern void framebuffer_destroy(Framebuffer *framebuffer);
 extern void framebuffer_bind(Framebuffer *framebuffer);
-extern void framebuffer_unbind();
+extern void framebuffer_unbind(void);
 extern Texture *framebuffer_get_texture(Framebuffer *framebuffer);
 
 /*********************************************************
@@ -118,7 +126,7 @@ extern void model_unload(Model *model);
  *                  CORE MATH FUNCTIONS                  *
  *********************************************************/
 
-extern Matrix matrix_identity();
+extern Matrix matrix_identity(void);
 extern Vec3 matrix_mul_vec3(Matrix left, Vec3 right);
 extern Matrix matrix_mul(Matrix left, Matrix right);
 extern void matrix_print(Matrix matrix);

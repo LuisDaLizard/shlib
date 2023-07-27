@@ -14,7 +14,7 @@
 #define DEG2RAD (float)(M_PI / 180.0f)
 #define RAD2DEG (float)(180.0f / M_PI)
 
-Matrix matrix_identity()
+Matrix matrix_identity(void)
 {
     Matrix result = { 0 };
     result.m00 = 1;

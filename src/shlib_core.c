@@ -14,6 +14,7 @@
  *********************************************************/
 
 Window window = { 0 };
+Input input = { 0 };
 
 /*********************************************************
  *                    WINDOW FUNCTIONS                   *
@@ -42,6 +43,7 @@ void window_init(int width, int height, const char *title)
         return;
 
     glfwSetWindowSizeCallback(window.handle, &window_resize_callback);
+    glfwSetCursorPosCallback(window.handle, &input_mouse_pos_callback);
 
     glfwMakeContextCurrent(window.handle);
 
@@ -90,11 +92,36 @@ Vec2 window_get_size(void)
     return (Vec2){(float)window.width, (float)window.height};
 }
 
+void window_disable_cursor(void)
+{
+    glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
+void window_enable_cursor(void)
+{
+    glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
 void window_resize_callback(GLFWwindow *handle, int width, int height)
 {
     window.width = width;
     window.height = height;
     glViewport(0, 0, width, height);
+}
+
+/*********************************************************
+ *                     INPUT FUNCTIONS                   *
+ *********************************************************/
+
+Vec2 input_get_mouse_pos()
+{
+    return (Vec2) {input.mouse_x, input.mouse_y};
+}
+
+void input_mouse_pos_callback(GLFWwindow *handle, double x, double y)
+{
+    input.mouse_x = (int)x;
+    input.mouse_y = (int)y;
 }
 
 /*********************************************************
@@ -338,7 +365,7 @@ void framebuffer_bind(Framebuffer *framebuffer)
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->id);
 }
 
-void framebuffer_unbind()
+void framebuffer_unbind(void)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, window.width, window.height);
