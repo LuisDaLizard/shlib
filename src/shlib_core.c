@@ -263,7 +263,7 @@ Texture *texture_load(void *data, int width, int height, int channels)
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
             break;
         default:
-            free(result);
+            texture_unload(result);
             return NULL;
     }
 
@@ -274,6 +274,7 @@ Texture *texture_load(void *data, int width, int height, int channels)
 
 void texture_unload(Texture *texture)
 {
+    glDeleteTextures(1, &texture->id);
     free(texture);
 }
 
@@ -284,6 +285,68 @@ void texture_use(Texture *texture, int slot)
 
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_2D, texture->id);
+}
+
+/*********************************************************
+ *                 FRAMEBUFFER FUNCTIONS                 *
+ *********************************************************/
+
+Framebuffer *framebuffer_create_depth(int width, int height)
+{
+    Framebuffer *result = malloc(sizeof(Framebuffer));
+    result->texture = malloc(sizeof(Texture));
+    result->texture->width = width;
+    result->texture->height = height;
+
+    glGenFramebuffers(1, &result->id);
+
+    // Generate Depth Map
+    glGenTextures(1, &result->texture->id);
+    glBindTexture(GL_TEXTURE_2D, result->texture->id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    // Attach depth to the framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, result->id);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, result->texture->id, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        printf("Heyo\n");
+        framebuffer_destroy(result);
+        return NULL;
+    }
+
+    return result;
+}
+
+void framebuffer_destroy(Framebuffer *framebuffer)
+{
+    glDeleteFramebuffers(1, &framebuffer->id);
+    free(framebuffer);
+}
+
+void framebuffer_bind(Framebuffer *framebuffer)
+{
+    glViewport(0, 0, framebuffer->texture->width, framebuffer->texture->height);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->id);
+}
+
+void framebuffer_unbind()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, window.width, window.height);
+}
+
+Texture *framebuffer_get_texture(Framebuffer *framebuffer)
+{
+    return framebuffer->texture;
 }
 
 /*********************************************************

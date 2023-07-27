@@ -41,6 +41,7 @@ typedef void Mesh;
 typedef void Model;
 typedef void Shader;
 typedef void Texture;
+typedef void Framebuffer;
 
 /*********************************************************
  *                    WINDOW FUNCTIONS                   *
@@ -86,6 +87,16 @@ extern void shader_set_uniform_matrix(Shader *shader, int location, Matrix value
 extern Texture *texture_load(void *data, int width, int height, int channels);
 extern void texture_unload(Texture *texture);
 extern void texture_use(Texture *texture, int slot);
+
+/*********************************************************
+ *                 FRAMEBUFFER FUNCTIONS                 *
+ *********************************************************/
+
+extern Framebuffer *framebuffer_create_depth(int width, int height);
+extern void framebuffer_destroy(Framebuffer *framebuffer);
+extern void framebuffer_bind(Framebuffer *framebuffer);
+extern void framebuffer_unbind();
+extern Texture *framebuffer_get_texture(Framebuffer *framebuffer);
 
 /*********************************************************
  *                     MESH FUNCTIONS                    *

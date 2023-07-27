@@ -57,7 +57,8 @@ typedef struct
 
 typedef struct
 {
-
+    unsigned int id;
+    Texture *texture;
 } Framebuffer;
 
 typedef struct
@@ -134,6 +135,16 @@ void shader_set_uniform_matrix(Shader *shader, int location, Matrix value);
 Texture *texture_load(void *data, int width, int height, int channels);
 void texture_unload(Texture *texture);
 void texture_use(Texture *texture, int slot);
+
+/*********************************************************
+ *                 FRAMEBUFFER FUNCTIONS                 *
+ *********************************************************/
+
+Framebuffer *framebuffer_create_depth(int width, int height);
+void framebuffer_destroy(Framebuffer *framebuffer);
+void framebuffer_bind(Framebuffer *framebuffer);
+void framebuffer_unbind();
+Texture *framebuffer_get_texture(Framebuffer *framebuffer);
 
 /*********************************************************
  *                     MESH FUNCTIONS                    *
