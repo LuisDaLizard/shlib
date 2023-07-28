@@ -166,16 +166,10 @@ Texture *framebuffer_get_texture(Framebuffer *framebuffer);
  *********************************************************/
 
 Mesh *mesh_create(Vertex *vertices, unsigned int *indices, int num_vertices, int num_indices);
-void mesh_setup(Mesh *mesh);
 void mesh_destroy(Mesh *mesh);
+void mesh_draw(Mesh *mesh);
 
-/*********************************************************
- *                    MODEL FUNCTIONS                    *
- *********************************************************/
-
-Model *model_load_from_mesh(Mesh *mesh);
-void model_draw(Model *model);
-void model_unload(Model *model);
+void mesh_setup(Mesh *mesh);
 
 /*********************************************************
  *                  CORE MATH FUNCTIONS                  *

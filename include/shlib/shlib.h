@@ -111,8 +111,8 @@ extern Texture *framebuffer_get_texture(Framebuffer *framebuffer);
  *********************************************************/
 
 extern Mesh *mesh_create(Vertex *vertices, unsigned int *indices, int num_vertices, int num_indices);
-extern Mesh *mesh_gen_cube(Vec3 scale);
 extern void mesh_destroy(Mesh *mesh);
+extern void mesh_draw(Mesh *mesh);
 
 /*********************************************************
  *                    MODEL FUNCTIONS                    *
