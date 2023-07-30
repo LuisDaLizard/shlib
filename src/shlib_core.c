@@ -156,27 +156,49 @@ void graphics_disable_wireframe(void)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
+void graphics_enable_depth(void)
+{
+    glEnable(GL_DEPTH_TEST);
+}
+
+void graphics_disable_depth(void)
+{
+    glDisable(GL_DEPTH_TEST);
+}
+
 void graphics_enable_backface_culling(void)
-{
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-}
-
-void graphics_disable_backface_culling(void)
-{
-    glDisable(GL_BLEND);
-}
-
-void graphics_enable_alpha_blending(void)
 {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 }
 
-void graphics_disable_alpha_blending(void)
+void graphics_disable_backface_culling(void)
 {
     glDisable(GL_CULL_FACE);
+}
+
+void graphics_enable_frontface_culling(void)
+{
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glFrontFace(GL_CCW);
+}
+
+void graphics_disable_frontface_culling(void)
+{
+    glDisable(GL_CULL_FACE);
+}
+
+void graphics_enable_alpha_blending(void)
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void graphics_disable_alpha_blending(void)
+{
+    glDisable(GL_BLEND);
 }
 
 

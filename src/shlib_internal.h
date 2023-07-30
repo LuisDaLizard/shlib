@@ -88,12 +88,6 @@ typedef struct
     unsigned int ebo;
 } Mesh;
 
-typedef struct
-{
-    Mesh **meshes;
-    int num_meshes;
-} Model;
-
 /*********************************************************
  *                    WINDOW FUNCTIONS                   *
  *********************************************************/
@@ -127,8 +121,12 @@ void graphics_begin_drawing(void);
 void graphics_end_drawing(void);
 void graphics_enable_wireframe(void);
 void graphics_disable_wireframe(void);
+void graphics_enable_depth(void);
+void graphics_disable_depth(void);
 void graphics_enable_backface_culling(void);
 void graphics_disable_backface_culling(void);
+void graphics_enable_frontface_culling(void);
+void graphics_disable_frontface_culling(void);
 void graphics_enable_alpha_blending(void);
 void graphics_disable_alpha_blending(void);
 

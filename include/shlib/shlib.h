@@ -38,7 +38,6 @@ typedef struct
 } Matrix;
 
 typedef void Mesh;
-typedef void Model;
 typedef void Shader;
 typedef void Texture;
 typedef void Framebuffer;
@@ -72,8 +71,12 @@ extern void graphics_begin_drawing(void);
 extern void graphics_end_drawing(void);
 extern void graphics_enable_wireframe(void);
 extern void graphics_disable_wireframe(void);
+extern void graphics_enable_depth(void);
+extern void graphics_disable_depth(void);
 extern void graphics_enable_backface_culling(void);
 extern void graphics_disable_backface_culling(void);
+extern void graphics_enable_frontface_culling(void);
+extern void graphics_disable_frontface_culling(void);
 extern void graphics_enable_alpha_blending(void);
 extern void graphics_disable_alpha_blending(void);
 
@@ -113,14 +116,6 @@ extern Texture *framebuffer_get_texture(Framebuffer *framebuffer);
 extern Mesh *mesh_create(Vertex *vertices, unsigned int *indices, int num_vertices, int num_indices);
 extern void mesh_destroy(Mesh *mesh);
 extern void mesh_draw(Mesh *mesh);
-
-/*********************************************************
- *                    MODEL FUNCTIONS                    *
- *********************************************************/
-
-extern Model *model_load_from_mesh(Mesh *mesh);
-extern void model_draw(Model *model);
-extern void model_unload(Model *model);
 
 /*********************************************************
  *                  CORE MATH FUNCTIONS                  *
