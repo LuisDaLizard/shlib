@@ -129,6 +129,7 @@ typedef struct
     int mouse_x, mouse_y;
 
     bool mouse_buttons[MOUSE_COUNT];
+    bool keys[KEY_COUNT];
 } Input;
 
 typedef struct
@@ -168,9 +169,11 @@ void window_resize_callback(GLFWwindow *handle, int width, int height);
 
 Vec2 input_get_mouse_pos(void);
 bool input_is_mouse_button_down(MouseButtons button);
+bool input_is_key_down(Keys key);
 
 void input_mouse_pos_callback(GLFWwindow *handle, double x, double y);
 void input_mouse_button_callback(GLFWwindow *handle, int button, int action, int mods);
+void input_key_callback(GLFWwindow *handle, int key, int scancode, int action, int mods);
 
 /*********************************************************
  *                   GRAPHICS FUNCTIONS                  *

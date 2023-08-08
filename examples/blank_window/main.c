@@ -14,7 +14,7 @@ int main()
 
     while(!window_should_close())
     {
-        if (input_is_mouse_button_down(MOUSE_LEFT))
+        if (input_is_key_down(KEY_SPACE))
             rg += 0.02f;
 
         graphics_begin_drawing();
