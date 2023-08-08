@@ -42,6 +42,54 @@ typedef void Shader;
 typedef void Texture;
 typedef void Framebuffer;
 
+typedef enum
+{
+    MOUSE_LEFT,
+    MOUSE_RIGHT,
+    MOUSE_MIDDLE,
+} MouseButtons;
+
+typedef enum
+{
+    KEY_SPACE = 32,
+    KEY_ESC = 256,
+    KEY_ENTER,
+    KEY_TAB,
+    KEY_BACKSPACE,
+    KEY_INSERT,
+    KEY_DELETE,
+    KEY_RIGHT,
+    KEY_LEFT,
+    KEY_DOWN,
+    KEY_UP,
+    KEY_A = 65,
+    KEY_B,
+    KEY_C,
+    KEY_D,
+    KEY_E,
+    KEY_F,
+    KEY_G,
+    KEY_H,
+    KEY_I,
+    KEY_J,
+    KEY_K,
+    KEY_L,
+    KEY_M,
+    KEY_N,
+    KEY_O,
+    KEY_P,
+    KEY_Q,
+    KEY_R,
+    KEY_S,
+    KEY_T,
+    KEY_U,
+    KEY_V,
+    KEY_W,
+    KEY_X,
+    KEY_Y,
+    KEY_Z,
+} Keys;
+
 /*********************************************************
  *                    WINDOW FUNCTIONS                   *
  *********************************************************/
@@ -61,6 +109,7 @@ extern void window_enable_cursor(void);
  *********************************************************/
 
 extern Vec2 input_get_mouse_pos(void);
+extern bool input_is_mouse_button_down(MouseButtons button);
 
 /*********************************************************
  *                   GRAPHICS FUNCTIONS                  *

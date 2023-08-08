@@ -26,9 +26,7 @@ void window_init(int width, int height, const char *title)
     window.height = height;
 
     if (!glfwInit())
-    {
         return;
-    }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -44,6 +42,7 @@ void window_init(int width, int height, const char *title)
 
     glfwSetWindowSizeCallback(window.handle, &window_resize_callback);
     glfwSetCursorPosCallback(window.handle, &input_mouse_pos_callback);
+    glfwSetMouseButtonCallback(window.handle, &input_mouse_button_callback);
 
     glfwMakeContextCurrent(window.handle);
 
@@ -118,10 +117,20 @@ Vec2 input_get_mouse_pos()
     return (Vec2) {input.mouse_x, input.mouse_y};
 }
 
+bool input_is_mouse_button_down(MouseButtons button)
+{
+    return input.mouse_buttons[button];
+}
+
 void input_mouse_pos_callback(GLFWwindow *handle, double x, double y)
 {
     input.mouse_x = (int)x;
     input.mouse_y = (int)y;
+}
+
+void input_mouse_button_callback(GLFWwindow *handle, int button, int action, int mods)
+{
+    input.mouse_buttons[button] = action;
 }
 
 /*********************************************************
