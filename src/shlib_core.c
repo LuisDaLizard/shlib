@@ -128,6 +128,11 @@ bool input_is_key_down(Keys key)
     return input.keys[key];
 }
 
+double input_get_time()
+{
+    return glfwGetTime();
+}
+
 void input_mouse_pos_callback(GLFWwindow *handle, double x, double y)
 {
     input.mouse_x = (int)x;

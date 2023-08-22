@@ -170,6 +170,7 @@ void window_resize_callback(GLFWwindow *handle, int width, int height);
 Vec2 input_get_mouse_pos(void);
 bool input_is_mouse_button_down(MouseButtons button);
 bool input_is_key_down(Keys key);
+double input_get_time();
 
 void input_mouse_pos_callback(GLFWwindow *handle, double x, double y);
 void input_mouse_button_callback(GLFWwindow *handle, int button, int action, int mods);

@@ -111,6 +111,7 @@ extern void window_enable_cursor(void);
 extern Vec2 input_get_mouse_pos(void);
 extern bool input_is_mouse_button_down(MouseButtons button);
 extern bool input_is_key_down(Keys key);
+extern double input_get_time();
 
 /*********************************************************
  *                   GRAPHICS FUNCTIONS                  *
