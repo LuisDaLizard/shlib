@@ -17,9 +17,11 @@ int main()
         if (input_is_key_down(KEY_SPACE))
             rg += 0.02f;
 
-        graphics_begin_drawing();
+        window_poll_events();
+
         graphics_clear_screen((Vec4){cosf(rg), sinf(rg), 0});
-        graphics_end_drawing();
+
+        window_swap_buffers();
     }
 
     window_destroy();

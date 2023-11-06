@@ -4,6 +4,7 @@ project(shlib C)
 set(SOURCE
         src/shlib_core.c
         src/shlib_math.c
+        src/shlib_utils.c
         )
 
 set(LIBS
@@ -13,7 +14,8 @@ set(LIBS
 
 set(INCLUDES
         libs/glad/include
-        libs/glfw/include)
+        libs/glfw/include
+        libs/stb/include)
 
 set(SHLIB_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

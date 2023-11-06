@@ -4,7 +4,7 @@
 
 #include <shlib/shlib.h>
 
-Vertex vertices[4] =
+Vertex3D vertices[4] =
         {
                 {{0.5f, 0.5f, 0}}, // Top Right
                 {{0.5f, -0.5f, 0}},  // Bottom Right
@@ -50,40 +50,37 @@ int main()
 {
     window_init(800, 600, "Example 3 - 3D Space");
 
-    Model *cube = model_load_from_mesh(mesh_create(vertices, indices, 4, 6));
+    Mesh *cube = mesh_create(vertices, indices, 4, 6);
     Shader *shader = shader_load(vertex_src, fragment_src);
-    int projection_loc = shader_get_location(shader, "uProjection");
-    int view_loc = shader_get_location(shader, "uView");
-    int model_loc = shader_get_location(shader, "uModel");
 
     while(!window_should_close())
     {
-        graphics_begin_drawing();
+        window_poll_events();
         graphics_clear_screen((Vec4){0.1f, 0.1f, 0.1f, 1});
 
         rotation += 0.5f;
 
         Vec2 window_size = window_get_size();
         Matrix projection = matrix_perspective(window_size.x / window_size.y, 90.0f, 0.01f, 1000.0f);
-        shader_set_uniform_matrix(shader, projection_loc, projection);
+        shader_upload_matrix(shader, "uProjection", projection);
 
         Matrix view = matrix_look_at((Vec3){0, 5, 10}, (Vec3){0, 0, 0}, (Vec3){0, 1, 0});
-        shader_set_uniform_matrix(shader, view_loc, view);
+        shader_upload_matrix(shader, "uView", view);
 
         Matrix model = matrix_identity();
         model = matrix_scale(model, scale);
         model = matrix_rotate(model, rotation_dir, rotation);
         model = matrix_translate(model, position);
-        shader_set_uniform_matrix(shader, model_loc, model);
+        shader_upload_matrix(shader, "uModel", model);
 
         shader_use(shader);
-        model_draw(cube);
+        graphics_draw_mesh(cube);
 
-        graphics_end_drawing();
+        window_swap_buffers();
     }
 
     shader_unload(shader);
-    model_unload(cube);
+    mesh_destroy(cube);
 
     window_destroy();
 

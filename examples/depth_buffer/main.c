@@ -4,7 +4,7 @@
 
 #include <shlib/shlib.h>
 
-Vertex vertices[4] =
+Vertex3D vertices[4] =
         {
                 {{100, 100, -1}, {}, {1, 1}}, // Top Right
                 {{100, -100, 0}, {}, {1, 0}},  // Bottom Right
@@ -72,35 +72,33 @@ int main()
     window_init(800, 600, "Example 4 - Depth Buffer");
 
     Framebuffer *shadow_map = framebuffer_create_depth(1024, 1024);
-    Model *model = model_load_from_mesh(mesh_create(vertices, indices, 4, 6));
+    Mesh *model = mesh_create(vertices, indices, 4, 6);
     Shader *shadow = shader_load(shadow_vert, shadow_frag);
     Shader *texture = shader_load(texture_vert, texture_frag);
-    int shadow_projection_loc = shader_get_location(shadow, "uProjection");
-    int texture_projection_loc = shader_get_location(texture, "uProjection");
 
     while(!window_should_close())
     {
-        graphics_begin_drawing();
+        window_poll_events();
 
         framebuffer_bind(shadow_map);
         graphics_clear_screen((Vec4){0.2f, 0.2f, 0.2f, 1});
         Vec2 size = window_get_size();
         Matrix projection = matrix_ortho(-size.x / 2.0f, size.x / 2.0f, size.y / 2.0f, -size.y / 2.0f, 0.0f, 1.0f);
-        shader_set_uniform_matrix(shadow, shadow_projection_loc, projection);
+        shader_upload_matrix(shadow, "uProjection", projection);
         shader_use(shadow);
-        model_draw(model);
+        graphics_draw_mesh(model);
         framebuffer_unbind();
 
         graphics_clear_screen((Vec4){0.2f, 0.2f, 0.2f, 1});
-        shader_set_uniform_matrix(texture, texture_projection_loc, projection);
+        shader_upload_matrix(texture, "uProjection", projection);
         shader_use(texture);
-        texture_use(framebuffer_get_texture(shadow_map), 0);
-        model_draw(model);
+        texture_use(shadow_map->texture, 0);
+        graphics_draw_mesh(model);
 
-        graphics_end_drawing();
+        window_swap_buffers();
     }
 
-    model_unload(model);
+    mesh_destroy(model);
     framebuffer_destroy(shadow_map);
     shader_unload(shadow);
     shader_unload(texture);

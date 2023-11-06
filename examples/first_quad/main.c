@@ -4,7 +4,7 @@
 
 #include <shlib/shlib.h>
 
-Vertex vertices[4] =
+Vertex3D vertices[4] =
         {
                 {{100, 100, 0}, {}, {1, 1}}, // Top Right
                 {{100, -100, 0}, {}, {1, 0}},  // Bottom Right
@@ -58,29 +58,28 @@ int main()
 {
     window_init(800, 600, "Example 1 - First Quad");
 
-    Model *quad = model_load_from_mesh(mesh_create(vertices, indices, 4, 6));
+    Mesh *quad = mesh_create(vertices, indices, 4, 6);
     Shader *shader = shader_load(vertex_src, fragment_src);
     Texture *texture = texture_load(image_data, 2, 2, 4);
-    int projection_loc = shader_get_location(shader, "uProjection");
 
     while(!window_should_close())
     {
-        graphics_begin_drawing();
+        window_poll_events();
         graphics_clear_screen((Vec4){0.1f, 0.1f, 0.1f, 1});
 
         Vec2 size = window_get_size();
         Matrix projection = matrix_ortho(-size.x / 2.0f, size.x / 2.0f, size.y / 2.0f, -size.y / 2.0f, 0.0f, 1.0f);
-        shader_set_uniform_matrix(shader, projection_loc, projection);
+        shader_upload_matrix(shader, "uProjection", projection);
 
         shader_use(shader);
         texture_use(texture, 0);
-        model_draw(quad);
+        graphics_draw_mesh(quad);
 
-        graphics_end_drawing();
+        window_swap_buffers();
     }
 
     shader_unload(shader);
-    model_unload(quad);
+    mesh_destroy(quad);
     texture_unload(texture);
 
     window_destroy();
