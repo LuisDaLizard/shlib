@@ -314,6 +314,7 @@ Vec3 vec3_cross(Vec3 left, Vec3 right);
 Vec3 vec3_negate(Vec3 vector);
 Vec3 vec3_scale(Vec3 vector, float scalar);
 Vec3 vec3_mul(Vec3 left, Vec3 right);
+float vec3_magnitude(Vec3 vector);
 
 /*********************************************************
  *            MATRIX TRANSFORMATION FUNCTIONS            *

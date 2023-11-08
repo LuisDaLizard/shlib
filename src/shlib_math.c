@@ -205,6 +205,12 @@ Vec3 vec3_negate(Vec3 vector)
     return vector;
 }
 
+float vec3_magnitude(Vec3 vector)
+{
+    float mag = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
+    return sqrtf(mag);
+}
+
 Matrix matrix_ortho(float left, float right, float top, float bottom, float near, float far)
 {
     Matrix result = matrix_identity();
