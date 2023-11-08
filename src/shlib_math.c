@@ -178,6 +178,9 @@ Vec3 vec3_normalize(Vec3 vector)
 {
     float magnitude = sqrtf(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
 
+    if (magnitude == 0)
+        return (Vec3){ 0, 0, 0 };
+
     vector.x /= magnitude;
     vector.y /= magnitude;
     vector.z /= magnitude;
