@@ -205,6 +205,24 @@ Vec3 vec3_negate(Vec3 vector)
     return vector;
 }
 
+Vec3 vec3_scale(Vec3 vector, float scalar)
+{
+    vector.x *= scalar;
+    vector.y *= scalar;
+    vector.z *= scalar;
+
+    return vector;
+}
+
+Vec3 vec3_mul(Vec3 left, Vec3 right)
+{
+    left.x *= right.x;
+    left.y *= right.y;
+    left.z *= right.z;
+
+    return left;
+}
+
 float vec3_magnitude(Vec3 vector)
 {
     float mag = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
