@@ -83,6 +83,8 @@ typedef struct Vec4
     float x, y, z, w;
 } Vec4;
 
+typedef struct Vec4 Quaternion;
+
 typedef struct Matrix
 {
     float m00, m01, m02, m03;
@@ -315,16 +317,17 @@ Vec3 vec3_negate(Vec3 vector);
 Vec3 vec3_scale(Vec3 vector, float scalar);
 Vec3 vec3_mul(Vec3 left, Vec3 right);
 float vec3_magnitude(Vec3 vector);
+Quaternion vec3_degrees_to_quaternion(Vec3 degrees);
 
 /*********************************************************
  *            MATRIX TRANSFORMATION FUNCTIONS            *
  *********************************************************/
 
 Matrix matrix_create_scalar(Vec3 scalar);
-Matrix matrix_create_rotation(Vec3 axis, float degrees);
+Matrix matrix_create_rotation(Quaternion quaternion);
 Matrix matrix_create_translation(Vec3 translation);
 Matrix matrix_scale(Matrix matrix, Vec3 scalar);
-Matrix matrix_rotate(Matrix matrix, Vec3 axis, float degrees);
+Matrix matrix_rotate(Matrix matrix, Quaternion quaternion);
 Matrix matrix_translate(Matrix matrix, Vec3 translation);
 
 /*********************************************************

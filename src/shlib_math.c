@@ -73,7 +73,28 @@ Matrix matrix_create_scalar(Vec3 scalar)
     return result;
 }
 
-Matrix matrix_create_rotation(Vec3 axis, float degrees)
+Matrix matrix_create_rotation(Quaternion q)
+{
+    Matrix result = (Matrix){ 0 };
+
+    result.m00 = 1 - 2 * (q.y * q.y + q.z * q.z);
+    result.m01 = 2 * (q.x * q.y - q.w * q.z);
+    result.m02 = 2 * (q.x * q.z + q.w * q.y);
+
+    result.m10 = 2 * (q.x * q.y + q.w * q.z);
+    result.m11 = 1 - 2 * (q.x * q.x + q.z * q.z);
+    result.m12 = 2 * (q.y * q.z - q.w * q.x);
+
+    result.m20 = 2 * (q.x * q.z - q.w * q.y);
+    result.m21 = 2 * (q.y * q.z + q.w * q.x);
+    result.m22 = 1 - 2 * (q.x * q.x - q.y * q.y);
+
+    result.m33 = 1;
+
+    return result;
+}
+
+/*Matrix matrix_create_rotation(Vec3 axis, float degrees)
 {
     float rads = degrees * DEG2RAD;
     float cosr = cosf(rads);
@@ -94,7 +115,7 @@ Matrix matrix_create_rotation(Vec3 axis, float degrees)
     result.m22 = cosr + powf(axis.z, 2) * (1 - cosr);
 
     return result;
-}
+}*/
 
 Matrix matrix_scale(Matrix matrix, Vec3 scalar)
 {
@@ -105,6 +126,16 @@ Matrix matrix_scale(Matrix matrix, Vec3 scalar)
     return matrix;
 }
 
+Matrix matrix_rotate(Matrix matrix, Quaternion quaternion)
+{
+    Matrix rotation = matrix_create_rotation(quaternion);
+
+    matrix = matrix_mul(matrix, rotation);
+
+    return matrix;
+}
+
+/*
 Matrix matrix_rotate(Matrix matrix, Vec3 axis, float degrees)
 {
     Matrix rotation = matrix_create_rotation(axis, degrees);
@@ -113,6 +144,7 @@ Matrix matrix_rotate(Matrix matrix, Vec3 axis, float degrees)
 
     return matrix;
 }
+*/
 
 Matrix matrix_translate(Matrix matrix, Vec3 translation)
 {
@@ -230,6 +262,33 @@ float vec3_magnitude(Vec3 vector)
 {
     float mag = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
     return sqrtf(mag);
+}
+
+Quaternion vec3_degrees_to_quaternion(Vec3 degrees)
+{
+    float half_x = (degrees.x * DEG2RAD) * 0.5f;
+    float half_y = (degrees.y * DEG2RAD) * 0.5f;
+    float half_z = (degrees.z * DEG2RAD) * 0.5f;
+
+    float cos_half_x = cosf(half_x);
+    float sin_half_x = sinf(half_x);
+
+    float cos_half_y = cosf(half_y);
+    float sin_half_y = sinf(half_y);
+
+    float cos_half_z = cosf(half_z);
+    float sin_half_z = sinf(half_z);
+
+    Quaternion result = (Quaternion){ 0 };
+
+    result.x = sin_half_x * cos_half_y * cos_half_z - cos_half_x * sin_half_y * sin_half_z;
+    result.y = cos_half_x * sin_half_y * cos_half_z + sin_half_x * cos_half_y * sin_half_z;
+    result.z = cos_half_x * cos_half_y * sin_half_z - sin_half_x * sin_half_y * cos_half_z;
+    result.w = cos_half_x * cos_half_y * cos_half_z + sin_half_x * sin_half_y * sin_half_z;
+
+    result.z = -result.z; // ??? WHY
+
+    return result;
 }
 
 Matrix matrix_ortho(float left, float right, float top, float bottom, float near, float far)

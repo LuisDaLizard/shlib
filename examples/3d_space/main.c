@@ -3,6 +3,7 @@
 //
 
 #include <shlib/shlib.h>
+#include <printf.h>
 
 Vertex3D vertices[4] =
         {
@@ -43,8 +44,7 @@ const char *fragment_src = "#version 400 core\n"
 
 Vec3 position = (Vec3){0, 0, 0};
 Vec3 scale = (Vec3){2, 2, 2};
-Vec3 rotation_dir = (Vec3){0, 1, 0};
-float rotation = 15.0f;
+Vec3 rotation = (Vec3){0, 15, 0};
 
 int main()
 {
@@ -58,7 +58,7 @@ int main()
         window_poll_events();
         graphics_clear_screen((Vec4){0.1f, 0.1f, 0.1f, 1});
 
-        rotation += 0.5f;
+        rotation.y += 0.5f;
 
         Vec2 window_size = window_get_size();
         Matrix projection = matrix_perspective(window_size.x / window_size.y, 90.0f, 0.01f, 1000.0f);
@@ -69,7 +69,7 @@ int main()
 
         Matrix model = matrix_identity();
         model = matrix_scale(model, scale);
-        model = matrix_rotate(model, rotation_dir, rotation);
+        model = matrix_rotate(model, vec3_degrees_to_quaternion(rotation));
         model = matrix_translate(model, position);
         shader_upload_matrix(shader, "uModel", model);
 
