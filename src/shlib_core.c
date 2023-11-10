@@ -46,7 +46,7 @@ void window_init(int width, int height, const char *title)
     if (!window.handle)
         return;
 
-    glfwSetWindowSizeCallback(window.handle, &window_resize_callback);
+    glfwSetFramebufferSizeCallback(window.handle, &window_resize_callback);
     glfwSetCursorPosCallback(window.handle, &input_mouse_pos_callback);
     glfwSetMouseButtonCallback(window.handle, &input_mouse_button_callback);
     glfwSetKeyCallback(window.handle, &input_key_callback);
