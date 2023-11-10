@@ -161,25 +161,60 @@ typedef enum Keys
     KEY_Z,
 } Keys;
 
-/*********************************************************
- *                    WINDOW FUNCTIONS                   *
- *********************************************************/
 
+/*
+ * Creates the window and initializes OpenGL
+ */
 extern void window_init(int width, int height, const char *title);
+
+/*
+ * Closes the window and destroys the OpenGL context
+ */
 extern void window_destroy(void);
+
+/*
+ * Returns whether the window should close
+ */
 extern bool window_should_close(void);
+
+/*
+ * Tells glfw to poll for input events
+ */
 extern void window_poll_events(void);
+
+/*
+ * Swaps window buffers
+ */
 extern void window_swap_buffers(void);
+
+/*
+ * Toggles fullscreen
+ */
 extern void window_toggle_fullscreen(void);
+
+/*
+ * Gets the current size of the window
+ */
 extern Vec2 window_get_size(void);
+
+/*
+ * Disables the mouse cursor
+ */
 extern void window_disable_cursor(void);
+
+/*
+ * Enables the mouse cursor
+ */
 extern void window_enable_cursor(void);
 
-/*********************************************************
- *                     UTIL FUNCTIONS                    *
- *********************************************************/
-
+/*
+ * Reads the given file as text
+ */
 extern char *utils_read_file(const char *path);
+
+/*
+ * Reads the given file in bytes
+ */
 extern unsigned char *utils_read_file_bytes(const char *path);
 
 /*********************************************************
