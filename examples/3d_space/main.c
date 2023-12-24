@@ -19,7 +19,7 @@ unsigned int indices[6] =
                 0, 3, 2
         };
 
-const char *vertex_src = "#version 400 core\n"
+const char *quad_vert_src = "#version 400 core\n"
                          "\n"
                          "layout (location = 0) in vec3 aPosition;\n"
                          "layout (location = 1) in vec3 aNormal;\n"
@@ -33,7 +33,7 @@ const char *vertex_src = "#version 400 core\n"
                          "{\n"
                          "    gl_Position = uProjection * uView * uModel * vec4(aPosition, 1);\n"
                          "}";
-const char *fragment_src = "#version 400 core\n"
+const char *quad_frag_src = "#version 400 core\n"
                            "\n"
                            "out vec4 oColor;\n"
                            "\n"
@@ -51,7 +51,7 @@ int main()
     window_init(800, 600, "Example 3 - 3D Space");
 
     Mesh *cube = mesh_create(vertices, indices, 4, 6);
-    Shader *shader = shader_load(vertex_src, fragment_src);
+    Shader *shader = shader_load(quad_vert_src, quad_frag_src);
 
     while(!window_should_close())
     {

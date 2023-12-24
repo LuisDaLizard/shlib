@@ -59,6 +59,7 @@ void window_init(int width, int height, const char *title)
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_LINE_SMOOTH);
 }
 
 void window_destroy(void)
@@ -169,7 +170,7 @@ void graphics_clear_screen(Vec4 color)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void graphics_draw_batch(Batch *batch)
+void graphics_draw_batch_quads(Batch *batch)
 {
     if (!batch->num_quads)
         return;
@@ -178,15 +179,30 @@ void graphics_draw_batch(Batch *batch)
     for (i = 0; i < batch->num_textures; i++)
         texture_use(batch->textures[i], i);
 
-    glBindBuffer(GL_ARRAY_BUFFER, batch->vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(batch->num_quads * 4 * sizeof(Vertex2D)), batch->vertices);
+    glBindBuffer(GL_ARRAY_BUFFER, batch->quad_vbo);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(batch->num_quads * 4 * sizeof(QuadVertex)), batch->quad_vertices);
 
-    glBindVertexArray(batch->vao);
+    glBindVertexArray(batch->quad_vao);
     glDrawElements(GL_TRIANGLES, (int)(batch->num_quads * 6), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
     batch->num_quads = 0;
     batch->num_textures = 1;
+}
+
+void graphics_draw_batch_lines(Batch *batch)
+{
+    if (!batch->num_lines)
+        return;
+
+    glBindBuffer(GL_ARRAY_BUFFER, batch->line_vbo);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(batch->num_lines * 2 * sizeof(LineVertex)), batch->line_vertices);
+
+    glBindVertexArray(batch->line_vao);
+    glDrawArrays(GL_LINES, 0, (int)(batch->num_lines * 2));
+    glBindVertexArray(0);
+
+    batch->num_lines = 0;
 }
 
 void graphics_draw_mesh(Mesh *mesh)
@@ -429,55 +445,73 @@ void texture_use(Texture *texture, int slot)
  *                     BATCH FUNCTIONS                   *
  *********************************************************/
 
-Batch *batch_create(unsigned int max_quads)
+Batch *batch_create(unsigned int max_elements)
 {
     Batch *batch = malloc(sizeof(Batch));
 
-    batch->max_quads = max_quads;
+    batch->max_elements = max_elements;
     batch->num_quads = 0;
     batch->num_textures = 1;
+    batch->num_lines = 0;
 
-    batch->vertices = malloc(max_quads * 4 * sizeof(Vertex2D));
-    batch->indices = malloc(max_quads * 6 * sizeof(unsigned int));
+    batch->quad_vertices = malloc(max_elements * 4 * sizeof(QuadVertex));
+    batch->quad_indices = malloc(max_elements * 6 * sizeof(unsigned int));
+    batch->line_vertices = malloc(max_elements * 2 * sizeof(LineVertex));
+
     batch->textures = malloc(16 * sizeof(Texture *));
     unsigned char white[4] = { 0xFF, 0xFF, 0xFF, 0xFF };
     batch->textures[0] = texture_load(white, 1, 1, 4);
 
     // Generate indices
     int i, index = 0;
-    for (i = 0; i < max_quads * 6; i += 6)
+    for (i = 0; i < max_elements * 6; i += 6)
     {
-        batch->indices[i + 0] = index + 0;
-        batch->indices[i + 1] = index + 1;
-        batch->indices[i + 2] = index + 2;
+        batch->quad_indices[i + 0] = index + 0;
+        batch->quad_indices[i + 1] = index + 1;
+        batch->quad_indices[i + 2] = index + 2;
 
-        batch->indices[i + 3] = index + 2;
-        batch->indices[i + 4] = index + 3;
-        batch->indices[i + 5] = index + 0;
+        batch->quad_indices[i + 3] = index + 2;
+        batch->quad_indices[i + 4] = index + 3;
+        batch->quad_indices[i + 5] = index + 0;
 
         index += 4;
     }
 
-    glGenVertexArrays(1, &batch->vao);
-    glGenBuffers(1, &batch->vbo);
-    glGenBuffers(1, &batch->ebo);
+    glGenVertexArrays(1, &batch->quad_vao);
+    glGenBuffers(1, &batch->quad_vbo);
+    glGenBuffers(1, &batch->quad_ebo);
 
-    glBindVertexArray(batch->vao);
+    glBindVertexArray(batch->quad_vao);
 
-    glBindBuffer(GL_ARRAY_BUFFER, batch->vbo);
-    glBufferData(GL_ARRAY_BUFFER, (long)(batch->max_quads * 4 * sizeof(Vertex2D)), NULL, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, batch->quad_vbo);
+    glBufferData(GL_ARRAY_BUFFER, (long)(batch->max_elements * 4 * sizeof(QuadVertex)), NULL, GL_DYNAMIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void *)offsetof(QuadVertex, position));
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void *)sizeof(Vec3));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void *)offsetof(QuadVertex, color));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void *)(sizeof(Vec3) + sizeof(Vec4)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void *)offsetof(QuadVertex, tex_coord));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void *)(sizeof(Vec4) + sizeof(Vec3) + sizeof(Vec2)));
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void *)offsetof(QuadVertex, tex_id));
     glEnableVertexAttribArray(3);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, batch->ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(batch->max_quads * 6 * sizeof(unsigned int)), batch->indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, batch->quad_ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)(batch->max_elements * 6 * sizeof(unsigned int)), batch->quad_indices, GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
+    glGenVertexArrays(1, &batch->line_vao);
+    glGenBuffers(1, &batch->line_vbo);
+
+    glBindVertexArray(batch->line_vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, batch->line_vbo);
+    glBufferData(GL_ARRAY_BUFFER, (long)(batch->max_elements * 2 * sizeof(QuadVertex)), NULL, GL_DYNAMIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void *)offsetof(LineVertex, position));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void *)offsetof(LineVertex, color));
+    glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
 
@@ -486,21 +520,25 @@ Batch *batch_create(unsigned int max_quads)
 
 void batch_destroy(Batch *batch)
 {
-    glDeleteBuffers(1, &batch->vbo);
-    glDeleteBuffers(1, &batch->ebo);
-    glDeleteVertexArrays(1, &batch->vao);
+    glDeleteBuffers(1, &batch->quad_vbo);
+    glDeleteBuffers(1, &batch->quad_ebo);
+    glDeleteVertexArrays(1, &batch->quad_vao);
+
+    glDeleteBuffers(1, &batch->line_vbo);
+    glDeleteVertexArrays(1, &batch->line_vao);
 
     texture_unload(batch->textures[0]);
 
     free(batch->textures);
-    free(batch->vertices);
-    free(batch->indices);
+    free(batch->line_vertices);
+    free(batch->quad_vertices);
+    free(batch->quad_indices);
     free(batch);
 }
 
 void batch_add_sprite(Batch *batch, Vec2 position, Vec2 size, Texture *texture)
 {
-    if (batch->num_quads >= batch->max_quads)
+    if (batch->num_quads >= batch->max_elements)
         return;
 
     int i;
@@ -526,17 +564,17 @@ void batch_add_sprite(Batch *batch, Vec2 position, Vec2 size, Texture *texture)
     float top = position.y + (size.y / 2.0f);
     float bottom = position.y - (size.y / 2.0f);
 
-    batch->vertices[vertex_index + 0] = (Vertex2D){{left, top, 0}, {1, 1, 1, 1}, {0, 1}, (float)i};
-    batch->vertices[vertex_index + 1] = (Vertex2D){{right, top, 0}, {1, 1, 1, 1}, {1, 1}, (float)i};
-    batch->vertices[vertex_index + 2] = (Vertex2D){{right, bottom, 0}, {1, 1, 1, 1}, {1, 0}, (float)i};
-    batch->vertices[vertex_index + 3] = (Vertex2D){{left, bottom, 0}, {1, 1, 1, 1}, {0, 0}, (float)i};
+    batch->quad_vertices[vertex_index + 0] = (QuadVertex){{left, top, 0}, {1, 1, 1, 1}, {0, 1}, (float)i};
+    batch->quad_vertices[vertex_index + 1] = (QuadVertex){{right, top, 0}, {1, 1, 1, 1}, {1, 1}, (float)i};
+    batch->quad_vertices[vertex_index + 2] = (QuadVertex){{right, bottom, 0}, {1, 1, 1, 1}, {1, 0}, (float)i};
+    batch->quad_vertices[vertex_index + 3] = (QuadVertex){{left, bottom, 0}, {1, 1, 1, 1}, {0, 0}, (float)i};
 
     batch->num_quads++;
 }
 
 void batch_add_sprite_uv(Batch *batch, Vec2 position, Vec2 size, Vec2 uv[4], Texture *texture)
 {
-    if (batch->num_quads >= batch->max_quads)
+    if (batch->num_quads >= batch->max_elements)
         return;
 
     int i;
@@ -562,10 +600,10 @@ void batch_add_sprite_uv(Batch *batch, Vec2 position, Vec2 size, Vec2 uv[4], Tex
     float top = position.y + (size.y / 2.0f);
     float bottom = position.y - (size.y / 2.0f);
 
-    batch->vertices[vertex_index + 0] = (Vertex2D){{left, top, 0}, {1, 1, 1, 1}, uv[0], (float)i};
-    batch->vertices[vertex_index + 1] = (Vertex2D){{right, top, 0}, {1, 1, 1, 1}, uv[1], (float)i};
-    batch->vertices[vertex_index + 2] = (Vertex2D){{right, bottom, 0}, {1, 1, 1, 1}, uv[2], (float)i};
-    batch->vertices[vertex_index + 3] = (Vertex2D){{left, bottom, 0}, {1, 1, 1, 1}, uv[3], (float)i};
+    batch->quad_vertices[vertex_index + 0] = (QuadVertex){{left, top, 0}, {1, 1, 1, 1}, uv[0], (float)i};
+    batch->quad_vertices[vertex_index + 1] = (QuadVertex){{right, top, 0}, {1, 1, 1, 1}, uv[1], (float)i};
+    batch->quad_vertices[vertex_index + 2] = (QuadVertex){{right, bottom, 0}, {1, 1, 1, 1}, uv[2], (float)i};
+    batch->quad_vertices[vertex_index + 3] = (QuadVertex){{left, bottom, 0}, {1, 1, 1, 1}, uv[3], (float)i};
 
     batch->num_quads++;
 }
@@ -608,7 +646,7 @@ void batch_add_text(Batch *batch, Vec2 position, Font *font, const char *text)
 
 void batch_add_quad(Batch *batch, Vec2 position, Vec2 size, Vec4 color)
 {
-    if (batch->num_quads >= batch->max_quads)
+    if (batch->num_quads >= batch->max_elements)
         return;
 
     unsigned int vertex_index = batch->num_quads * 4;
@@ -618,12 +656,27 @@ void batch_add_quad(Batch *batch, Vec2 position, Vec2 size, Vec4 color)
     float top = position.y + (size.y / 2.0f);
     float bottom = position.y - (size.y / 2.0f);
 
-    batch->vertices[vertex_index + 0] = (Vertex2D){{left, top, 0}, color, {0, 1}, 0};
-    batch->vertices[vertex_index + 1] = (Vertex2D){{right, top, 0}, color, {1, 1}, 0};
-    batch->vertices[vertex_index + 2] = (Vertex2D){{right, bottom, 0}, color, {1, 0}, 0};
-    batch->vertices[vertex_index + 3] = (Vertex2D){{left, bottom, 0}, color, {0, 0}, 0};
+    batch->quad_vertices[vertex_index + 0] = (QuadVertex){{left, top, 0}, color, {0, 1}, 0};
+    batch->quad_vertices[vertex_index + 1] = (QuadVertex){{right, top, 0}, color, {1, 1}, 0};
+    batch->quad_vertices[vertex_index + 2] = (QuadVertex){{right, bottom, 0}, color, {1, 0}, 0};
+    batch->quad_vertices[vertex_index + 3] = (QuadVertex){{left, bottom, 0}, color, {0, 0}, 0};
 
     batch->num_quads++;
+}
+
+void batch_add_line(Batch *batch, Vec2 start, Vec2 end, Vec4 color, float width)
+{
+    if (batch->num_lines >= batch->max_elements)
+        return;
+
+    glLineWidth(width);
+
+    unsigned int vertex_index = batch->num_lines * 2;
+
+    batch->line_vertices[vertex_index + 0] = (LineVertex){{start.x, start.y, 0}, color};
+    batch->line_vertices[vertex_index + 1] = (LineVertex){{end.x, end.y, 0}, color};
+
+    batch->num_lines++;
 }
 
 /*********************************************************

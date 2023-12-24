@@ -100,7 +100,13 @@ typedef struct Vertex2D
     Vec4 color;
     Vec2 tex_coord;
     float tex_id;
-} Vertex2D;
+} QuadVertex;
+
+typedef struct LineVertex
+{
+    Vec3 position;
+    Vec4 color;
+} LineVertex;
 
 typedef struct Vertex3D
 {
@@ -156,18 +162,21 @@ typedef struct Font
 
 typedef struct Batch
 {
-    unsigned int max_quads;
+    unsigned int max_elements;
     unsigned int num_quads;
+    unsigned int num_lines;
 
-    Vertex2D *vertices;
-    unsigned int *indices;
+    QuadVertex *quad_vertices;
+    unsigned int *quad_indices;
+
+    LineVertex *line_vertices;
 
     Texture **textures;
     unsigned int num_textures;
 
-    unsigned int vao;
-    unsigned int vbo;
-    unsigned int ebo;
+    unsigned int quad_vao, line_vao;
+    unsigned int quad_vbo, line_vbo;
+    unsigned int quad_ebo;
 } Batch;
 
 typedef struct Window
@@ -229,7 +238,7 @@ void input_key_callback(GLFWwindow *handle, int key, int scancode, int action, i
  *********************************************************/
 
 void graphics_clear_screen(Vec4 color);
-void graphics_draw_batch(Batch *batch);
+void graphics_draw_batch_quads(Batch *batch);
 void graphics_draw_mesh(Mesh *mesh);
 
 /*********************************************************
@@ -261,12 +270,13 @@ void texture_use(Texture *texture, int slot);
  *                     BATCH FUNCTIONS                   *
  *********************************************************/
 
-Batch *batch_create(unsigned int max_quads);
+Batch *batch_create(unsigned int max_elements);
 void batch_destroy(Batch *batch);
 void batch_add_sprite(Batch *batch, Vec2 position, Vec2 size, Texture *texture);
 void batch_add_sprite_uv(Batch *batch, Vec2 position, Vec2 size, Vec2 uv[4], Texture *texture);
 void batch_add_text(Batch *batch, Vec2 position, Font *font, const char *text);
 void batch_add_quad(Batch *batch, Vec2 position, Vec2 size, Vec4 color);
+void batch_add_line(Batch *batch, Vec2 start, Vec2 end, Vec4 color, float width);
 
 /*********************************************************
  *                     FONT FUNCTIONS                    *

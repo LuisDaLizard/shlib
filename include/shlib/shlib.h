@@ -37,12 +37,19 @@ typedef struct Matrix
 } Matrix;
 
 
-typedef struct Vertex2D
+typedef struct QuadVertex
 {
     Vec3 position;
+    Vec4 color;
     Vec2 tex_coord;
     float tex_id;
-} Vertex2D;
+} QuadVertex;
+
+typedef struct LineVertex
+{
+    Vec3 position;
+    Vec4 color;
+} LineVertex;
 
 typedef struct Vertex3D
 {
@@ -80,18 +87,21 @@ typedef struct Mesh
 
 typedef struct Batch
 {
-    unsigned int max_quads;
+    unsigned int max_elements;
     unsigned int num_quads;
+    unsigned int num_lines;
 
-    Vertex2D *vertices;
-    unsigned int *indices;
+    QuadVertex *quad_vertices;
+    unsigned int *quad_indices;
+
+    LineVertex *line_vertices;
 
     Texture **textures;
     unsigned int num_textures;
 
-    unsigned int vao;
-    unsigned int vbo;
-    unsigned int ebo;
+    unsigned int quad_vao, line_vao;
+    unsigned int quad_vbo, line_vbo;
+    unsigned int quad_ebo;
 } Batch;
 
 typedef struct Framebuffer
@@ -231,7 +241,8 @@ extern double input_get_time();
  *********************************************************/
 
 extern void graphics_clear_screen(Vec4 color);
-extern void graphics_draw_batch(Batch *batch);
+extern void graphics_draw_batch_quads(Batch *batch);
+extern void graphics_draw_batch_lines(Batch *batch);
 extern void graphics_draw_mesh(Mesh *mesh);
 
 /*********************************************************
@@ -263,12 +274,13 @@ extern void texture_use(Texture *texture, int slot);
  *                     BATCH FUNCTIONS                   *
  *********************************************************/
 
-extern Batch *batch_create(unsigned int max_quads);
+extern Batch *batch_create(unsigned int max_elements);
 extern void batch_destroy(Batch *batch);
 extern void batch_add_sprite(Batch *batch, Vec2 position, Vec2 size, Texture *texture);
 extern void batch_add_sprite_uv(Batch *batch, Vec2 position, Vec2 size, Vec2 uv[4], Texture *texture);
 extern void batch_add_text(Batch *batch, Vec2 position, Font *font, const char *text);
 extern void batch_add_quad(Batch *batch, Vec2 position, Vec2 size, Vec4 color);
+extern void batch_add_line(Batch *batch, Vec2 start, Vec2 end, Vec4 color, float width);
 
 /*********************************************************
  *                     FONT FUNCTIONS                    *

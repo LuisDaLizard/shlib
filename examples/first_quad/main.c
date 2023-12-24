@@ -26,7 +26,7 @@ unsigned char image_data[16] =
                 0xff, 0x00, 0x00, 0xff // Bottom Left
         };
 
-const char *vertex_src = "#version 400 core\n"
+const char *quad_vert_src = "#version 400 core\n"
                          "\n"
                          "layout (location = 0) in vec3 aPosition;\n"
                          "layout (location = 1) in vec3 aNormal;\n"
@@ -41,7 +41,7 @@ const char *vertex_src = "#version 400 core\n"
                          "    fTexCoord = aTexCoord;\n"
                          "    gl_Position = uProjection * vec4(aPosition, 1);\n"
                          "}";
-const char *fragment_src = "#version 400 core\n"
+const char *quad_frag_src = "#version 400 core\n"
                            "\n"
                            "in vec2 fTexCoord;\n"
                            "\n"
@@ -59,7 +59,7 @@ int main()
     window_init(800, 600, "Example 1 - First Quad");
 
     Mesh *quad = mesh_create(vertices, indices, 4, 6);
-    Shader *shader = shader_load(vertex_src, fragment_src);
+    Shader *shader = shader_load(quad_vert_src, quad_frag_src);
     Texture *texture = texture_load(image_data, 2, 2, 4);
 
     while(!window_should_close())

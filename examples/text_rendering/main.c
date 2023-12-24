@@ -7,7 +7,7 @@
 
 #define MAX_QUADS 100
 
-const char *vertex_src = "#version 400 core\n"
+const char *quad_vert_src = "#version 400 core\n"
                          "\n"
                          "layout (location = 0) in vec3 aPosition;\n"
                          "layout (location = 1) in vec4 aColor;\n"
@@ -27,7 +27,7 @@ const char *vertex_src = "#version 400 core\n"
                          "    fTexId = aTexId;\n"
                          "    gl_Position = uProjection * vec4(aPosition, 1);\n"
                          "}";
-const char *fragment_src = "#version 400 core\n"
+const char *quad_frag_src = "#version 400 core\n"
                            "\n"
                            "in vec4 fColor;\n"
                            "in vec2 fTexCoord;\n"
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     window_init(800, 600, "Example 5 - Batch Rendering");
     Font *font = font_load_from_file("./retro.ttf", 36);
     Batch *batch = batch_create(MAX_QUADS);
-    Shader *shader = shader_load(vertex_src, fragment_src);
+    Shader *shader = shader_load(quad_vert_src, quad_frag_src);
     int samplers[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     shader_upload_int_array(shader, "uTextures", 16, samplers);
     Matrix projection = matrix_ortho(-400, 400, 300, -300, -1.0f, 1.0f);
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 
         shader_upload_matrix(shader, "uProjection", projection);
         shader_use(shader);
-        graphics_draw_batch(batch);
+        graphics_draw_batch_quads(batch);
         window_swap_buffers();
     }
     batch_destroy(batch);
